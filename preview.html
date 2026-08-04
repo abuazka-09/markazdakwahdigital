@@ -1,0 +1,386 @@
+﻿<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MARKAZ DAKWAH DIGITAL - Smart Education Dashboard</title>
+  <style>
+    :root {
+      --blue-950: #06152f;
+      --blue-900: #09245a;
+      --blue-800: #0e3c8a;
+      --blue-700: #1454b8;
+      --blue-500: #2478e6;
+      --blue-100: #eaf3ff;
+      --gold-600: #c99526;
+      --gold-500: #e0b34e;
+      --gold-100: #fff5d8;
+      --white: #ffffff;
+      --ink: #142033;
+      --muted: #66758b;
+      --line: #dbe6f5;
+      --bg: #f5f8fd;
+      --card: rgba(255,255,255,.92);
+      --danger: #c2410c;
+      --success: #0f8a61;
+      --shadow: 0 22px 60px rgba(9,36,90,.12);
+      --radius: 10px;
+    }
+    [data-theme="dark"] {
+      --bg: #061126;
+      --card: rgba(9, 25, 55, .92);
+      --ink: #eef5ff;
+      --muted: #aab9cf;
+      --line: rgba(223,233,247,.16);
+      --blue-100: rgba(36,120,230,.16);
+      --gold-100: rgba(224,179,78,.16);
+      --shadow: 0 22px 60px rgba(0,0,0,.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(36,120,230,.16), transparent 30%),
+        radial-gradient(circle at 85% 10%, rgba(224,179,78,.18), transparent 26%),
+        var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { display: grid; grid-template-columns: 286px minmax(0,1fr); min-height: 100vh; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow: auto;
+      background: linear-gradient(180deg, var(--blue-950), var(--blue-900));
+      color: white; padding: 22px 18px; border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .brand { display: flex; gap: 13px; align-items: center; padding: 4px 4px 18px; border-bottom: 1px solid rgba(255,255,255,.12); }
+    .brand img { width: 66px; height: 66px; object-fit: contain; filter: drop-shadow(0 10px 18px rgba(0,0,0,.28)); }
+    .brand strong { display:block; line-height:1.05; font-size: 15px; }
+    .brand span { display:block; margin-top:4px; color: #d8e8ff; font-size: 12px; }
+    .nav { margin-top: 18px; display: grid; gap: 7px; }
+    .nav button {
+      width: 100%; height: 42px; display:flex; align-items:center; gap:10px;
+      border: 1px solid transparent; border-radius: 8px; background: transparent; color: #dceaff;
+      padding: 0 12px; text-align: left; font-weight: 700; font-size: 14px;
+    }
+    .nav button:hover, .nav button.active { background: rgba(255,255,255,.12); border-color: rgba(224,179,78,.42); color: white; }
+    .nav i { width: 22px; text-align: center; color: var(--gold-500); font-style: normal; }
+    .content { min-width:0; padding: 18px 22px 28px; }
+    .topbar {
+      position: sticky; top:0; z-index: 5; margin: -18px -22px 18px; padding: 14px 22px;
+      background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    .mobile-menu { display:none; }
+    .title { display:flex; align-items:center; gap:12px; min-width: 260px; flex:1; }
+    .title img { width: 52px; height:52px; object-fit: contain; }
+    h1 { margin:0; font-size: 24px; line-height:1.1; color: var(--ink); }
+    .subtitle { margin:4px 0 0; color: var(--muted); font-size: 13px; }
+    .actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .select, .search input, textarea.select {
+      height: 40px; border-radius: 8px; border:1px solid var(--line); background: var(--card); color: var(--ink); padding: 0 12px;
+    }
+    textarea.select { height:auto; min-height:82px; padding:10px 12px; resize:vertical; }
+    .search { position:relative; }
+    .search input { width: 260px; padding-left: 36px; }
+    .search span { position:absolute; left:12px; top:10px; color: var(--muted); }
+    .iconbtn, .primary, .ghost {
+      height: 40px; border-radius: 8px; border:1px solid var(--line); background: var(--card); color: var(--ink); padding: 0 12px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:700;
+    }
+    .iconbtn { width:40px; padding:0; }
+    .primary { background: linear-gradient(135deg, var(--blue-700), var(--blue-900)); color:white; border-color: transparent; }
+    .gold { background: linear-gradient(135deg, var(--gold-500), var(--gold-600)); color: #111827; border-color: transparent; }
+    .ghost:hover, .iconbtn:hover { border-color: var(--blue-500); }
+    .hero {
+      position: relative; overflow:hidden; border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow);
+      background: linear-gradient(135deg, var(--blue-950), var(--blue-800) 58%, #ffffff 58.1%, #ffffff 100%);
+      color:white; min-height: 220px; display:grid; grid-template-columns: 1fr 360px; gap: 18px;
+    }
+    [data-theme="dark"] .hero { background: linear-gradient(135deg, var(--blue-950), var(--blue-800)); }
+    .hero:before, .hero:after { content:""; position:absolute; border-radius:50%; border:1px solid rgba(224,179,78,.45); }
+    .hero:before { width:180px; height:180px; right:260px; top:-70px; }
+    .hero:after { width:260px; height:260px; right:-70px; bottom:-120px; }
+    .hero h2 { margin: 8px 0 10px; max-width: 720px; font-size: 34px; line-height:1.08; color:white; }
+    .hero p { margin:0; color:#d9e8ff; line-height:1.65; }
+    .hero-logo { position:relative; z-index:1; align-self:center; justify-self:center; width:270px; height:170px; object-fit:contain; filter: drop-shadow(0 18px 25px rgba(0,0,0,.32)); }
+    .badge { display:inline-flex; align-items:center; gap:8px; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:7px 11px; color:white; font-weight:800; font-size:13px; }
+    .grid-kpi { display:grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; margin-top: 16px; }
+    .card, .panel {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .card { padding: 16px; position:relative; overflow:hidden; }
+    .card:after { content:""; position:absolute; width:64px; height:64px; right:-16px; top:-18px; border-radius:50%; background: var(--blue-100); }
+    .card.goldish:after { background: var(--gold-100); }
+    .label { margin:0; color: var(--muted); font-size: 13px; }
+    .value { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-top: 12px; font-size: 26px; font-weight: 900; }
+    .delta { border-radius: 999px; padding: 5px 8px; font-size: 12px; font-weight: 800; background: var(--gold-100); color: var(--gold-600); white-space: nowrap; }
+    .layout { display:grid; grid-template-columns: minmax(0,1.1fr) minmax(340px,.9fr); gap: 14px; margin-top:14px; }
+    .panel { padding: 17px; min-width:0; }
+    .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .panel h3 { margin:0; font-size: 17px; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .tabs button { height:32px; border-radius: 8px; border:1px solid var(--line); background: var(--card); color: var(--muted); padding:0 10px; font-weight:700; }
+    .tabs button.active { background: var(--blue-700); color:white; border-color: transparent; }
+    .chart { min-height: 280px; display:grid; align-items:end; gap:10px; grid-template-columns: repeat(8,1fr); padding: 16px 4px 4px; }
+    .bar { min-height: 40px; border-radius: 9px 9px 4px 4px; background: linear-gradient(180deg, var(--blue-500), var(--blue-900)); position:relative; display:flex; align-items:flex-end; justify-content:center; color:white; font-size:11px; font-weight:800; padding-bottom:7px; }
+    .bar:nth-child(even) { background: linear-gradient(180deg, var(--gold-500), var(--gold-600)); color:#111827; }
+    .bar:before { content: attr(data-label); position:absolute; bottom:-22px; color:var(--muted); font-weight:700; }
+    .circles { display:grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .circle-card { text-align:center; padding: 14px; border:1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--card) 88%, var(--blue-100)); }
+    .donut { --p: 80; width:116px; height:116px; border-radius:50%; margin: 0 auto 10px; background: conic-gradient(var(--gold-500) calc(var(--p)*1%), var(--blue-100) 0); display:grid; place-items:center; position:relative; }
+    .donut:after { content:""; width:76px; height:76px; border-radius:50%; background: var(--card); position:absolute; }
+    .donut strong { position:relative; z-index:1; font-size: 20px; }
+    .flow { display:grid; grid-template-columns: repeat(5,1fr); align-items:center; gap:10px; margin-top: 10px; }
+    .node { min-height:82px; border-radius: 10px; border:1px solid var(--line); background: linear-gradient(180deg, var(--card), color-mix(in srgb, var(--blue-100) 65%, var(--card))); display:grid; place-items:center; text-align:center; padding:10px; font-weight:800; }
+    .arrow { height:2px; background: linear-gradient(90deg, var(--blue-500), var(--gold-500)); position:relative; }
+    .arrow:after { content:""; position:absolute; right:0; top:-4px; border-left:8px solid var(--gold-500); border-top:5px solid transparent; border-bottom:5px solid transparent; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th { text-align:left; color:var(--muted); font-weight:800; padding:10px 8px; border-bottom:1px solid var(--line); }
+    td { padding:12px 8px; border-bottom:1px solid var(--line); }
+    .status { border-radius:999px; padding:5px 8px; font-size:12px; font-weight:800; display:inline-flex; }
+    .ok { background: #dcfce7; color:#166534; } .warn { background: var(--gold-100); color:#8a5d00; } .bad { background:#ffedd5; color:var(--danger); }
+    [data-theme="dark"] .ok { background: rgba(22,101,52,.32); color:#8ff0b3; }
+    .section { display:none; }
+    .section.active { display:block; animation: fade .18s ease-out; }
+    @keyframes fade { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+    .toast, .modal, .notif {
+      position: fixed; z-index: 20; background: var(--card); color:var(--ink); border:1px solid var(--line); box-shadow: var(--shadow); border-radius:10px;
+    }
+    .toast { right:20px; bottom:20px; padding:13px 15px; display:none; max-width: 360px; }
+    .toast.show { display:block; }
+    .notif { top:72px; right:22px; width:320px; padding:14px; display:none; }
+    .notif.show { display:block; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.42); display:none; z-index: 18; }
+    .modal-backdrop.show { display:block; }
+    .modal { left:50%; top:50%; transform: translate(-50%,-50%); width:min(900px,calc(100vw - 28px)); max-height: calc(100vh - 28px); overflow:auto; padding:18px; display:none; }
+    .modal.show { display:block; }
+    .modal h3 { margin-top:0; }
+    .student-tools { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .student-tools .label { max-width: 620px; line-height:1.5; }
+    .form-section { margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
+    .form-section h4 { margin:0 0 10px; font-size:14px; color:var(--blue-700); text-transform:uppercase; letter-spacing:.04em; }
+    [data-theme="dark"] .form-section h4 { color:#9ec7ff; }
+    .form-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:12px; }
+    .form-field { display:grid; gap:6px; min-width:0; }
+    .form-field.full { grid-column:1 / -1; }
+    .form-field label { color:var(--muted); font-size:12px; font-weight:800; }
+    .form-field input, .form-field select, .form-field textarea { width:100%; }
+    .upload-note { color:var(--muted); font-size:12px; line-height:1.4; }
+    .student-cell { display:flex; align-items:center; gap:10px; min-width:220px; }
+    .student-photo { width:42px; height:42px; border-radius:8px; object-fit:cover; background:var(--blue-100); border:1px solid var(--line); display:grid; place-items:center; color:var(--blue-700); font-weight:900; flex:0 0 42px; }
+    .student-meta small { display:block; color:var(--muted); margin-top:3px; }
+    .doc-pill { display:inline-flex; align-items:center; border-radius:999px; padding:4px 7px; background:var(--blue-100); color:var(--blue-800); font-size:12px; font-weight:800; }
+    .qr { margin:12px auto; width:180px; height:180px; background: repeating-linear-gradient(45deg,#0b1f45 0 10px,#fff 10px 20px); border:12px solid white; box-shadow: inset 0 0 0 8px #0b1f45; }
+    .empty { padding: 24px; color:var(--muted); text-align:center; }
+    .nav-ico { width:24px; height:24px; border-radius:8px; display:grid; place-items:center; flex:0 0 24px; background: rgba(224,179,78,.16); border:1px solid rgba(224,179,78,.42); color: var(--gold-500); font-size: 11px; font-weight: 900; line-height:1; }
+    .hamb { width:18px; display:grid; gap:4px; }
+    .hamb span { display:block; height:2px; border-radius:99px; background: currentColor; }
+    .searchIcon { width:15px; height:15px; border:2px solid var(--muted); border-radius:50%; display:inline-block; position:absolute; left:13px; top:11px; }
+    .searchIcon:after { content:""; width:7px; height:2px; background:var(--muted); position:absolute; right:-6px; bottom:-3px; transform:rotate(45deg); border-radius:99px; }
+    .themeIcon { width:18px; height:18px; border-radius:50%; display:block; background:linear-gradient(90deg,var(--blue-900) 0 50%, var(--gold-500) 50% 100%); box-shadow:inset 0 0 0 2px rgba(255,255,255,.65); }
+    .bellIcon { width:16px; height:17px; border:2px solid currentColor; border-bottom:0; border-radius:10px 10px 4px 4px; display:block; position:relative; }
+    .bellIcon:before { content:""; position:absolute; left:3px; right:3px; bottom:-5px; height:2px; background:currentColor; border-radius:99px; }
+    .bellIcon:after { content:""; position:absolute; left:5px; bottom:-9px; width:4px; height:4px; background:currentColor; border-radius:50%; }
+    .pulseDot { width:9px; height:9px; border-radius:50%; display:inline-block; background:var(--gold-500); box-shadow:0 0 0 5px rgba(224,179,78,.18); }
+    .btnIcon { width:16px; height:16px; display:inline-block; position:relative; flex:0 0 16px; }
+    .refreshIcon { border:2px solid currentColor; border-right-color:transparent; border-radius:50%; }
+    .refreshIcon:after { content:""; position:absolute; right:-2px; top:0; border-left:5px solid currentColor; border-top:4px solid transparent; border-bottom:4px solid transparent; transform:rotate(18deg); }
+    .exportIcon:before { content:""; position:absolute; left:7px; top:1px; width:2px; height:10px; background:currentColor; }
+    .exportIcon:after { content:""; position:absolute; left:3px; top:7px; width:10px; height:10px; border-left:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(-45deg); }
+    .importIcon:before { content:""; position:absolute; left:7px; top:5px; width:2px; height:10px; background:currentColor; }
+    .importIcon:after { content:""; position:absolute; left:3px; top:0; width:10px; height:10px; border-left:2px solid currentColor; border-top:2px solid currentColor; transform:rotate(45deg); }
+    .qrIcon { display:grid; grid-template-columns:repeat(2,7px); grid-template-rows:repeat(2,7px); gap:2px; }
+    .qrIcon:before, .qrIcon:after { content:""; background:currentColor; border-radius:2px; box-shadow:9px 0 0 currentColor, 0 9px 0 currentColor; }
+    .drawer-backdrop { display:none; }
+    @media(max-width: 1120px){ .hero{grid-template-columns:1fr}.hero-logo{display:none}.grid-kpi{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.circles{grid-template-columns:1fr 1fr 1fr}.flow{grid-template-columns:1fr}.arrow{height:26px;width:2px;margin:auto}.arrow:after{right:-4px;top:18px;transform:rotate(90deg)} }
+    @media(max-width: 760px){ .app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:30;transform:translateX(-105%);transition:.2s;width:286px}.sidebar.open{transform:translateX(0)}.drawer-backdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:25}.mobile-menu{display:inline-flex}.content{padding:14px}.topbar{margin:-14px -14px 14px;padding:12px 14px}.title{min-width:0}.title img{width:44px;height:44px}h1{font-size:19px}.search input{width:100%}.search{width:100%}.actions{width:100%}.select{flex:1}.grid-kpi{grid-template-columns:1fr}.circles{grid-template-columns:1fr}.hero h2{font-size:27px}.hero{padding:18px}.chart{grid-template-columns:repeat(4,1fr);row-gap:34px}.form-grid{grid-template-columns:1fr}.modal{width:calc(100vw - 18px);padding:14px} }
+  </style>
+</head>
+<body>
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <div class="app" id="app" data-theme="light">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><img src="apps/web/public/logo-mdd.png" alt="Logo MDD"><div><strong>MARKAZ DAKWAH</strong><span>DIGITAL SMART DASHBOARD</span></div></div>
+      <nav class="nav" id="nav">
+        <button class="active" data-page="dashboard"><span class="nav-ico">DU</span> Dashboard Utama</button>
+        <button data-page="santri"><span class="nav-ico">DS</span> Database Santri</button>
+        <button data-page="akademik"><span class="nav-ico">AK</span> Akademik</button>
+        <button data-page="hafalan"><span class="nav-ico">HF</span> Hafalan</button>
+        <button data-page="kesehatan"><span class="nav-ico">KS</span> Kesehatan</button>
+        <button data-page="keuangan"><span class="nav-ico">KG</span> Keuangan</button>
+        <button data-page="donasi"><span class="nav-ico">ZD</span> ZISWAF & Donasi</button>
+        <button data-page="orangtua"><span class="nav-ico">OT</span> Orang Tua</button>
+        <button data-page="bi"><span class="nav-ico">BI</span> BI Dashboard</button>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <button class="iconbtn mobile-menu" id="menuBtn" title="Buka menu"><span class="hamb"><span></span><span></span><span></span></span></button>
+        <div class="title"><img src="apps/web/public/logo-mdd.png" alt="Logo MDD"><div><h1>MARKAZ DAKWAH DIGITAL</h1><p class="subtitle">Smart Education Dashboard realtime</p></div></div>
+        <div class="actions">
+          <label class="search"><span class="searchIcon"></span><input id="globalSearch" placeholder="Cari santri, guru, donatur, invoice..."></label>
+          <select class="select" id="roleSelect"><option>Super Admin</option><option>Direktur</option><option>Kepala Pendidikan</option><option>Guru</option><option>Ustadz Pembimbing</option><option>Tim Kesehatan</option><option>Bendahara</option><option>Orang Tua</option></select>
+          <button class="iconbtn" id="themeBtn" title="Dark/Light Mode"><span class="themeIcon"></span></button>
+          <button class="iconbtn" id="notifBtn" title="Notifikasi"><span class="bellIcon"></span></button>
+        </div>
+      </header>
+
+      <section class="section active" id="dashboard">
+        <div class="hero">
+          <div><span class="badge"><span class="pulseDot"></span> Realtime aktif</span><h2>Lembaga Pendidikan Islam Modern Markaz Dakwah Digital</h2><p><strong>(Inspired by Revelation. Driven by Innovation)</strong><br>Berilmu &bull; Beradab &bull; Berdampak</p><div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" data-action="refresh"><span class="btnIcon refreshIcon"></span> Refresh Data</button><button class="gold" data-action="export"><span class="btnIcon exportIcon"></span> Export CSV</button><button class="ghost" data-action="qr"><span class="btnIcon qrIcon"></span> QR Absensi</button></div></div>
+          <img class="hero-logo" src="apps/web/public/logo-mdd.png" alt="Logo Markaz Dakwah Digital">
+        </div>
+        <div class="grid-kpi" id="kpiGrid"></div>
+        <div class="layout"><div class="panel"><div class="panel-head"><h3>Diagram Pertumbuhan Lembaga</h3><div class="tabs"><button class="active" data-chart="attendance">Kehadiran</button><button data-chart="academic">Akademik</button><button data-chart="finance">Keuangan</button></div></div><div class="chart" id="barChart"></div></div><div class="panel"><div class="panel-head"><h3>Circle Report</h3><button class="ghost" data-action="refresh">Update</button></div><div class="circles" id="circleReports"></div></div></div>
+        <div class="layout"><div class="panel"><div class="panel-head"><h3>Alur Data Realtime</h3><button class="ghost" data-action="import"><span class="btnIcon importIcon"></span> Import</button></div><div class="flow"><div class="node">Input Guru</div><div class="arrow"></div><div class="node">Validasi Sistem</div><div class="arrow"></div><div class="node">Dashboard Orang Tua</div></div></div><div class="panel"><div class="panel-head"><h3>Activity Feed</h3><button class="ghost" data-action="notify">Lihat</button></div><div id="feed"></div></div></div>
+      </section>
+
+      <section class="section" id="santri"><div class="panel"><div class="panel-head"><h3>Database Santri</h3><button class="primary" data-action="add">+ Tambah Santri</button></div><div class="student-tools"><p class="label">Profil santri, data orang tua/wali, dan dokumen pendukung dicatat sebagai satu database operasional terpusat.</p><span class="doc-pill" id="studentCount">0 Santri</span></div><div style="overflow:auto"><table id="studentTable"></table></div></div></section>
+      <section class="section" id="akademik"><div class="layout"><div class="panel"><h3>Nilai Akademik</h3><div class="chart" id="academicChart"></div></div><div class="panel"><h3>Mata Pelajaran Aktif</h3><div id="subjectList"></div></div></div></section>
+      <section class="section" id="hafalan"><div class="layout"><div class="panel"><h3>Progress Hafalan</h3><div class="circles" id="hafalanCircles"></div></div><div class="panel"><h3>Setoran Terbaru</h3><div id="hafalanFeed"></div></div></div></section>
+      <section class="section" id="kesehatan"><div class="layout"><div class="panel"><h3>Grafik Kesehatan Santri</h3><div class="chart" id="healthChart"></div></div><div class="panel"><h3>Catatan Tim Kesehatan</h3><div id="healthFeed"></div></div></div></section>
+      <section class="section" id="keuangan"><div class="layout"><div class="panel"><h3>SPP dan Pembayaran</h3><div class="chart" id="financeChart"></div></div><div class="panel"><h3>Invoice Prioritas</h3><div id="invoiceList"></div></div></div></section>
+      <section class="section" id="donasi"><div class="layout"><div class="panel"><h3>Campaign ZISWAF & Donasi</h3><div class="circles" id="donationCircles"></div></div><div class="panel"><h3>Donatur Terbaru</h3><div id="donorList"></div></div></div></section>
+      <section class="section" id="orangtua"><div class="layout"><div class="panel"><h3>Dashboard Orang Tua</h3><div class="hero" style="grid-template-columns:1fr;background:linear-gradient(135deg,var(--blue-900),var(--blue-700));min-height:auto"><span class="badge">Akun Orang Tua</span><h2 style="font-size:28px">Ahmad Zaidan Al-Faruqi</h2><p>Kelas VIII Tahfidz A · Absensi 96% · Hafalan 18 Juz · Tagihan aktif Rp 750.000</p></div></div><div class="panel"><h3>Ringkasan Anak</h3><div id="parentSummary"></div></div></div></section>
+      <section class="section" id="bi"><div class="panel"><div class="panel-head"><h3>Business Intelligence Dashboard</h3><button class="gold" data-action="export">Export BI</button></div><div class="actions" style="margin-bottom:14px"><select class="select"><option>Semua Tanggal</option><option>Bulan Ini</option></select><select class="select"><option>Semua Program</option><option>Tahfidz</option></select><select class="select"><option>Semua Kelas</option><option>VIII Tahfidz A</option></select><select class="select"><option>Semua Gender</option><option>Laki-laki</option><option>Perempuan</option></select></div><div class="layout"><div><div class="chart" id="biChart"></div></div><div class="circles" id="biCircles"></div></div></div></section>
+    </main>
+  </div>
+
+  <div class="notif" id="notifPanel"><b>Notifikasi</b><div class="feed" style="margin-top:10px"><div><b>Pengumuman baru</b><small>Rapat wali santri Jumat 08.00</small></div><div><b>Pembayaran masuk</b><small>Donasi Wakaf Rp 12.500.000</small></div><div><b>Absensi</b><small>8 santri perlu konfirmasi izin</small></div></div></div>
+  <div class="modal-backdrop" id="modalBackdrop"></div><div class="modal" id="modal"><h3 id="modalTitle">Modal</h3><div id="modalBody"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="ghost" id="modalClose">Tutup</button><button class="primary" id="modalOk">Simpan</button></div></div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const kpis=[['Jumlah Santri',1248,'+8,4%'],['Jumlah Guru',86,'+4'],['Jumlah Ustadz',42,'+3'],['Total Donasi','Rp 1,82 M','83% target'],['Kehadiran','96%','Realtime'],['Target Hafalan','78%','Naik'],['Jumlah Kelas',54,'Aktif'],['Donatur',7430,'+17%']];
+    const studentSeed=[
+      {nis:'MD-2026-0001',namaLengkap:'Ahmad Zaidan',namaPanggilan:'Zaidan',kelas:'VIII Tahfidz A',programPendidikan:'Tahfidz',status:'Aktif',jenisKelamin:'Laki-laki',tanggalMasuk:'2026-07-15',waliKelas:'Ust. Fikri',ustadzPembimbing:'Ust. Mahmud',namaAyah:'Bapak Hasan',namaIbu:'Ibu Aisyah',hpAyah:'081234567001',hpIbu:'081234567002'},
+      {nis:'MD-2026-0002',namaLengkap:'Fatimah Azzahra',namaPanggilan:'Fatimah',kelas:'VII B',programPendidikan:'Bahasa Arab',status:'Aktif',jenisKelamin:'Perempuan',tanggalMasuk:'2026-07-15',waliKelas:'Usth. Salma',ustadzPembimbing:'Usth. Maryam',namaAyah:'Bapak Abdullah',namaIbu:'Ibu Khadijah',hpAyah:'081234567003',hpIbu:'081234567004'},
+      {nis:'MD-2026-0003',namaLengkap:'Hasan Al-Banna',namaPanggilan:'Hasan',kelas:'IX Coding',programPendidikan:'AI & Coding',status:'Aktif',jenisKelamin:'Laki-laki',tanggalMasuk:'2026-07-15',waliKelas:'Ust. Hilmi',ustadzPembimbing:'Ust. Ihsan',namaAyah:'Bapak Ridwan',namaIbu:'Ibu Safiyah',hpAyah:'081234567005',hpIbu:'081234567006'},
+      {nis:'MD-2026-0004',namaLengkap:'Maryam Shalihah',namaPanggilan:'Maryam',kelas:'VIII Tahsin',programPendidikan:'Tahsin',status:'Izin',jenisKelamin:'Perempuan',tanggalMasuk:'2026-07-15',waliKelas:'Usth. Nadia',ustadzPembimbing:'Usth. Laila',namaAyah:'Bapak Yusuf',namaIbu:'Ibu Aminah',hpAyah:'081234567007',hpIbu:'081234567008'}
+    ];
+    let students=JSON.parse(localStorage.getItem('mdd_students')||'null')||studentSeed;
+    const studentFields=[
+      ['DATA SANTRI','foto','Foto','file','Foto santri akan ditampilkan di tabel database.','full'],
+      ['DATA SANTRI','nis','NIS','text','',''],
+      ['DATA SANTRI','namaLengkap','Nama Lengkap','text','',''],
+      ['DATA SANTRI','namaPanggilan','Nama Panggilan','text','',''],
+      ['DATA SANTRI','tempatLahir','Tempat Lahir','text','',''],
+      ['DATA SANTRI','tanggalLahir','Tanggal Lahir','date','',''],
+      ['DATA SANTRI','jenisKelamin','Jenis Kelamin','select:Laki-laki|Perempuan','',''],
+      ['DATA SANTRI','alamat','Alamat','textarea','','full'],
+      ['DATA SANTRI','hpSantri','Nomor HP Santri','tel','',''],
+      ['DATA SANTRI','email','Email Aktif','email','',''],
+      ['DATA SANTRI','golonganDarah','Golongan Darah','select:-|A|B|AB|O','',''],
+      ['DATA SANTRI','riwayatPenyakit','Riwayat Penyakit','textarea','',''],
+      ['DATA SANTRI','alergi','Alergi','textarea','',''],
+      ['DATA SANTRI','status','Status','select:Aktif|Izin|Cuti|Alumni|Nonaktif','',''],
+      ['DATA SANTRI','tanggalMasuk','Tanggal Masuk','date','',''],
+      ['DATA SANTRI','programPendidikan','Program Pendidikan','text','',''],
+      ['DATA SANTRI','kelas','Kelas','text','',''],
+      ['DATA SANTRI','waliKelas','Wali Kelas','text','',''],
+      ['DATA SANTRI','ustadzPembimbing','Ustadz Pembimbing','text','',''],
+      ['DATA ORANGTUA/WALI','namaAyah','Nama Ayah','text','',''],
+      ['DATA ORANGTUA/WALI','namaIbu','Nama Ibu','text','',''],
+      ['DATA ORANGTUA/WALI','pekerjaanAyah','Pekerjaan Ayah','text','',''],
+      ['DATA ORANGTUA/WALI','tempatLahirAyah','Tempat Lahir Ayah','text','',''],
+      ['DATA ORANGTUA/WALI','tanggalLahirAyah','Tanggal Lahir Ayah','date','',''],
+      ['DATA ORANGTUA/WALI','pekerjaanIbu','Pekerjaan Ibu','text','',''],
+      ['DATA ORANGTUA/WALI','tempatLahirIbu','Tempat Lahir Ibu','text','',''],
+      ['DATA ORANGTUA/WALI','tanggalLahirIbu','Tanggal Lahir Ibu','date','',''],
+      ['DATA ORANGTUA/WALI','jumlahSaudara','Jumlah Saudara','number','',''],
+      ['DATA ORANGTUA/WALI','anakKe','Anak Ke','number','',''],
+      ['DATA ORANGTUA/WALI','hpAyah','No. HP Aktif & WA Ayah','tel','',''],
+      ['DATA ORANGTUA/WALI','hpIbu','No. HP Aktif & WA Ibu','tel','',''],
+      ['DATA ORANGTUA/WALI','alamatOrangtua','Alamat Orangtua','textarea','','full'],
+      ['DATA ORANGTUA/WALI','kartuKeluarga','Upload Kartu Keluarga','file','Nama file dicatat untuk sinkronisasi Google Workspace.',''],
+      ['DATA ORANGTUA/WALI','aktaKelahiran','Upload Akta Kelahiran Anak','file','Nama file dicatat untuk sinkronisasi Google Workspace.','']
+    ];
+    const feeds=['Absensi pagi tersinkron: 1.126 santri hadir','Setoran hafalan baru: 312 halaman tercatat','Tagihan SPP diperbarui: 214 invoice terbit','Pemeriksaan kesehatan kelas IX-B selesai'];
+    const charts={attendance:[76,82,88,91,86,94,96,92],academic:[70,75,82,85,88,86,91,93],finance:[58,62,74,79,83,89,92,96]};
+    const labels=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu'];
+    const circleData=[['Hafalan',78],['Akademik',88],['Kesehatan',82]];
+    const pages=[...document.querySelectorAll('.section')];
+    const nav=[...document.querySelectorAll('#nav button')];
+    const toast=document.getElementById('toast');
+    const googleWorkspace={
+      ownerEmail:'abuazka1510@gmail.com',
+      spreadsheetId:'1ISqIvTpHNGRaITm0fV_44tVECoR7qBhQOUBUvDXtqPs',
+      driveFolderId:'1Xb8w_VcjeVHSHQuKo1ob23M2wtfEhtdb',
+      appsScriptUrl:''
+    };
+    function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2300)}
+    function setPage(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));nav.forEach(b=>b.classList.toggle('active',b.dataset.page===id));document.getElementById('sidebar').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('show');showToast('Membuka menu: '+document.querySelector('[data-page="'+id+'"]').innerText.replace(/[?????????]/g,'').trim())}
+    function renderKpi(){document.getElementById('kpiGrid').innerHTML=kpis.map((k,i)=>`<article class="card ${i%3===0?'goldish':''}"><p class="label">${k[0]}</p><div class="value"><span>${k[1]}</span><span class="delta">${k[2]}</span></div></article>`).join('')}
+    function renderBars(id,data){document.getElementById(id).innerHTML=data.map((v,i)=>`<div class="bar" data-label="${labels[i]}" style="height:${Math.max(48,v*2.35)}px">${v}%</div>`).join('')}
+    function renderCircles(id,data=circleData){document.getElementById(id).innerHTML=data.map(d=>`<div class="circle-card"><div class="donut" style="--p:${d[1]}"><strong>${d[1]}%</strong></div><b>${d[0]}</b><p class="label">Target semester</p></div>`).join('')}
+    function renderFeed(id,items=feeds){document.getElementById(id).innerHTML=`<div class="feed">${items.map(x=>`<div><b>${x.split(':')[0]}</b><small>${x.split(':')[1]||'Update realtime'}</small></div>`).join('')}</div>`}
+    function escapeHtml(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+    function persistStudents(){localStorage.setItem('mdd_students',JSON.stringify(students))}
+    function initials(name=''){return name.split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'MD'}
+    function renderTable(){
+      document.getElementById('studentCount').textContent=students.length+' Santri';
+      document.getElementById('studentTable').innerHTML='<thead><tr><th>Santri</th><th>NIS</th><th>Kelas</th><th>Program</th><th>Wali Kelas</th><th>Orang Tua/Wali</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+students.map((s,i)=>`<tr><td><div class="student-cell">${s.foto?`<img class="student-photo" src="${s.foto}" alt="Foto ${escapeHtml(s.namaLengkap)}">`:`<span class="student-photo">${initials(s.namaLengkap)}</span>`}<div class="student-meta"><b>${escapeHtml(s.namaLengkap)}</b><small>${escapeHtml(s.namaPanggilan||'-')} · ${escapeHtml(s.jenisKelamin||'-')}</small></div></div></td><td>${escapeHtml(s.nis||'-')}</td><td>${escapeHtml(s.kelas||'-')}</td><td>${escapeHtml(s.programPendidikan||'-')}</td><td>${escapeHtml(s.waliKelas||'-')}</td><td>${escapeHtml(s.namaAyah||s.namaIbu||'-')}<br><small class="label">${escapeHtml(s.hpAyah||s.hpIbu||'-')}</small></td><td><span class="status ${s.status==='Aktif'?'ok':s.status==='Nonaktif'?'bad':'warn'}">${escapeHtml(s.status||'-')}</span></td><td><button class="ghost" data-action="detail" data-index="${i}">Detail</button></td></tr>`).join('')+'</tbody>'
+    }
+    function renderLists(){document.getElementById('subjectList').innerHTML='<div class="feed"><div><b>Tahfidz</b><small>Ustadz pembimbing aktif: 42</small></div><div><b>Digital Dakwah</b><small>Content creator, AI, coding, desain</small></div><div><b>Bahasa Arab</b><small>Silabus semester ganjil selesai</small></div></div>';document.getElementById('invoiceList').innerHTML='<div class="feed"><div><b>SPP Juli</b><small>Rp 750.000 · jatuh tempo 25 Juli</small></div><div><b>Wakaf Gedung</b><small>Progress 83% dari target</small></div></div>';document.getElementById('donorList').innerHTML='<div class="feed"><div><b>Hamba Allah</b><small>Rp 12.500.000 · Wakaf</small></div><div><b>Keluarga Bapak Hasan</b><small>Rp 3.000.000 · Infaq</small></div></div>';document.getElementById('parentSummary').innerHTML='<div class="feed"><div><b>Absensi</b><small>96% bulan ini</small></div><div><b>Nilai</b><small>Rata-rata akademik 88,4</small></div><div><b>Catatan Guru</b><small>Fokus belajar meningkat</small></div></div>'}
+    function buildField(field){
+      const [,key,label,type,note,span]=field;
+      const cls='form-field '+(span==='full'?'full':'');
+      if(type==='textarea')return `<div class="${cls}"><label for="${key}">${label}</label><textarea class="select" id="${key}" name="${key}"></textarea></div>`;
+      if(type.startsWith('select:'))return `<div class="${cls}"><label for="${key}">${label}</label><select class="select" id="${key}" name="${key}">${type.slice(7).split('|').map(x=>`<option>${x}</option>`).join('')}</select></div>`;
+      return `<div class="${cls}"><label for="${key}">${label}</label><input class="select" id="${key}" name="${key}" type="${type}" ${type==='file'?'accept="image/*,.pdf"':''}>${note?`<span class="upload-note">${note}</span>`:''}</div>`;
+    }
+    function studentFormHtml(){
+      const groups=[...new Set(studentFields.map(f=>f[0]))];
+      return `<form id="studentForm">${groups.map(g=>`<div class="form-section"><h4>${g}</h4><div class="form-grid">${studentFields.filter(f=>f[0]===g).map(buildField).join('')}</div></div>`).join('')}<p class="label" style="margin-top:14px">Tahap awal menyimpan data di browser. Pada backend production, struktur field ini siap dikirim ke Google Sheets dan file upload ke Google Drive.</p></form>`;
+    }
+    function readFileAsDataUrl(file){return new Promise(resolve=>{if(!file)return resolve('');const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.readAsDataURL(file)})}
+    async function syncStudentToWorkspace(data){
+      if(!googleWorkspace.appsScriptUrl)return {skipped:true};
+      const payload={type:'student.create',ownerEmail:googleWorkspace.ownerEmail,data};
+      await fetch(googleWorkspace.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+      return {ok:true};
+    }
+    async function saveStudentFromForm(){
+      const form=document.getElementById('studentForm');
+      if(!form)return;
+      const data={createdAt:new Date().toISOString()};
+      for(const field of studentFields){
+        const key=field[1], input=form.elements[key];
+        if(!input)continue;
+        if(input.type==='file'){
+          const file=input.files[0];
+          if(key==='foto'){
+            data.fotoFileName=file?file.name:'';
+            data[key]=await readFileAsDataUrl(file);
+          }else data[key]=file?file.name:'';
+        }else data[key]=input.value.trim();
+      }
+      if(!data.nis||!data.namaLengkap){showToast('NIS dan Nama Lengkap wajib diisi');return}
+      students=[data,...students];persistStudents();renderTable();closeModal();setPage('santri');showToast('Data santri tersimpan di database awal');
+      try{const result=await syncStudentToWorkspace(data);if(!result.skipped)showToast('Data santri dikirim ke Google Workspace')}catch(err){showToast('Data lokal tersimpan, sinkron Google Workspace tertunda')}
+    }
+    function openAddStudentModal(){openModal('Tambah Santri',studentFormHtml(),'Simpan Santri');document.getElementById('modalOk').onclick=saveStudentFromForm}
+    function detailHtml(s){
+      const docs=[s.kartuKeluarga&&'Kartu Keluarga: '+s.kartuKeluarga,s.aktaKelahiran&&'Akta Kelahiran: '+s.aktaKelahiran].filter(Boolean);
+      return `<div class="student-cell" style="margin-bottom:12px">${s.foto?`<img class="student-photo" style="width:72px;height:72px" src="${s.foto}" alt="Foto ${escapeHtml(s.namaLengkap)}">`:`<span class="student-photo" style="width:72px;height:72px">${initials(s.namaLengkap)}</span>`}<div><b>${escapeHtml(s.namaLengkap||'-')}</b><p class="label">${escapeHtml(s.nis||'-')} · ${escapeHtml(s.kelas||'-')} · ${escapeHtml(s.programPendidikan||'-')}</p></div></div><div class="form-grid"><div><b>Profil Santri</b><p class="label">${escapeHtml(s.tempatLahir||'-')}, ${escapeHtml(s.tanggalLahir||'-')}<br>${escapeHtml(s.alamat||'-')}<br>HP: ${escapeHtml(s.hpSantri||'-')} · Email: ${escapeHtml(s.email||'-')}</p></div><div><b>Kesehatan</b><p class="label">Gol. darah: ${escapeHtml(s.golonganDarah||'-')}<br>Riwayat: ${escapeHtml(s.riwayatPenyakit||'-')}<br>Alergi: ${escapeHtml(s.alergi||'-')}</p></div><div><b>Pembimbing</b><p class="label">Wali kelas: ${escapeHtml(s.waliKelas||'-')}<br>Ustadz pembimbing: ${escapeHtml(s.ustadzPembimbing||'-')}<br>Masuk: ${escapeHtml(s.tanggalMasuk||'-')}</p></div><div><b>Orang Tua/Wali</b><p class="label">Ayah: ${escapeHtml(s.namaAyah||'-')} (${escapeHtml(s.hpAyah||'-')})<br>Ibu: ${escapeHtml(s.namaIbu||'-')} (${escapeHtml(s.hpIbu||'-')})<br>${escapeHtml(s.alamatOrangtua||'-')}</p></div></div>${docs.length?`<p style="margin-top:12px">${docs.map(d=>`<span class="doc-pill">${escapeHtml(d)}</span>`).join(' ')}</p>`:''}`;
+    }
+    function openModal(title,body,ok='Simpan'){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modalOk').textContent=ok;document.getElementById('modalOk').onclick=()=>{closeModal();showToast('Aksi berhasil diproses')};document.getElementById('modalBackdrop').classList.add('show');document.getElementById('modal').classList.add('show')}
+    function closeModal(){document.getElementById('modalBackdrop').classList.remove('show');document.getElementById('modal').classList.remove('show')}
+    function exportCsv(){const rows=[['NIS','Nama','Kelas','Program','Status'],...students.map(s=>[s.nis,s.namaLengkap,s.kelas,s.programPendidikan,s.status])];const csv=rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='laporan-markaz-dakwah-digital.csv';a.click();showToast('File CSV laporan dibuat')}
+    function randomize(){kpis[0][1]=1200+Math.floor(Math.random()*90);kpis[4][1]=(92+Math.floor(Math.random()*7))+'%';renderKpi();renderBars('barChart',charts.attendance.map(v=>Math.max(55,Math.min(99,v+Math.floor(Math.random()*8-3)))));showToast('Data realtime diperbarui')}
+    document.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.page)setPage(btn.dataset.page);if(btn.dataset.chart){document.querySelectorAll('[data-chart]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderBars('barChart',charts[btn.dataset.chart])}const a=btn.dataset.action;if(a==='refresh')randomize();if(a==='export')exportCsv();if(a==='import')openModal('Import Excel / CSV','<p class="label">Pilih file data santri, nilai, absensi, atau donasi. Pada versi production, data akan divalidasi sebelum masuk database.</p><input class="select" type="file" style="width:100%;margin-top:12px">','Upload');if(a==='qr')openModal('QR Code Absensi','<div class="qr"></div><p class="label" style="text-align:center">Scan untuk simulasi absensi santri realtime.</p>','Aktifkan');if(a==='add')openAddStudentModal();if(a==='detail')openModal('Detail Santri',detailHtml(students[Number(btn.dataset.index)]||{}),'Tutup');if(a==='notify')document.getElementById('notifPanel').classList.toggle('show')});
+    document.getElementById('themeBtn').onclick=()=>{const app=document.getElementById('app');app.dataset.theme=app.dataset.theme==='dark'?'light':'dark';showToast('Tema '+app.dataset.theme+' aktif')};
+    document.getElementById('notifBtn').onclick=()=>document.getElementById('notifPanel').classList.toggle('show');
+    document.getElementById('menuBtn').onclick=()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('drawerBackdrop').classList.add('show')};
+    document.getElementById('drawerBackdrop').onclick=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('show')};
+    document.getElementById('modalClose').onclick=closeModal;document.getElementById('modalBackdrop').onclick=closeModal;document.getElementById('modalOk').onclick=()=>{closeModal();showToast('Aksi berhasil diproses')};
+    document.getElementById('roleSelect').onchange=e=>{if(e.target.value==='Orang Tua')setPage('orangtua');showToast('Role aktif: '+e.target.value)};
+    document.getElementById('globalSearch').oninput=e=>{const q=e.target.value.toLowerCase();if(!q)return;const found=students.filter(s=>Object.values(s).join(' ').toLowerCase().includes(q));if(found.length){setPage('santri');showToast(found.length+' data cocok ditemukan')}else showToast('Belum ada data cocok untuk: '+e.target.value)};
+    renderKpi();renderBars('barChart',charts.attendance);renderBars('academicChart',charts.academic);renderBars('healthChart',[70,72,76,80,79,84,87,89]);renderBars('financeChart',charts.finance);renderBars('biChart',[62,69,74,81,88,91,93,96]);renderCircles('circleReports');renderCircles('hafalanCircles',[['Al-Quran',78],['Hadits',64],['Kitab',71]]);renderCircles('donationCircles',[['Zakat',86],['Infaq',74],['Wakaf',83]]);renderCircles('biCircles',[['Prestasi',82],['Guru',91],['Donasi',88]]);renderFeed('feed');renderFeed('hafalanFeed',['Ahmad Zaidan: Setor 2 halaman Surah Al-Kahfi','Fatimah Azzahra: Murajaah Juz 29 selesai']);renderFeed('healthFeed',['Kelas IX-B: Pemeriksaan BMI selesai','Tim Kesehatan: 3 santri perlu kontrol lanjutan']);renderTable();renderLists();
+  </script>
+</body>
+</html>

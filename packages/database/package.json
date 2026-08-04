@@ -1,0 +1,6 @@
+{
+  "name": "@markaz/database",
+  "private": true,
+  "version": "0.1.0",
+  "description": "PostgreSQL schema for MARKAZ DAKWAH DIGITAL."
+}
