@@ -2,6 +2,12 @@
 
 Smart Education Dashboard adalah starter aplikasi PWA untuk mengelola santri, orang tua, guru, akademik, kesehatan, keuangan, ZISWAF, donasi, dan business intelligence dalam satu dashboard realtime.
 
+## Link Aplikasi
+
+Versi installable PWA:
+
+https://markaz-dakwah-digital.abuazka1510.chatgpt.site
+
 ## Stack
 
 - Frontend: Next.js, React, TypeScript, Tailwind CSS, Framer Motion, ECharts
