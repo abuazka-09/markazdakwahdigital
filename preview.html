@@ -173,7 +173,11 @@
     .student-photo { width:42px; height:42px; border-radius:8px; object-fit:cover; background:var(--blue-100); border:1px solid var(--line); display:grid; place-items:center; color:var(--blue-700); font-weight:900; flex:0 0 42px; }
     .student-meta small { display:block; color:var(--muted); margin-top:3px; }
     .doc-pill { display:inline-flex; align-items:center; border-radius:999px; padding:4px 7px; background:var(--blue-100); color:var(--blue-800); font-size:12px; font-weight:800; }
-    .qr { margin:12px auto; width:180px; height:180px; background: repeating-linear-gradient(45deg,#0b1f45 0 10px,#fff 10px 20px); border:12px solid white; box-shadow: inset 0 0 0 8px #0b1f45; }
+    .qr { margin:12px auto; width:220px; height:220px; display:block; object-fit:contain; border:12px solid white; background:white; box-shadow: 0 10px 28px rgba(9,36,90,.18); }
+    .qr-fallback { display:grid; place-items:center; text-align:center; padding:14px; color:var(--muted); border:1px dashed var(--line); border-radius:8px; }
+    .workspace-status { display:grid; gap:8px; margin-top:10px; }
+    .workspace-status div { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); }
+    .workspace-status b { color:var(--ink); }
     .empty { padding: 24px; color:var(--muted); text-align:center; }
     .nav-ico { width:24px; height:24px; border-radius:8px; display:grid; place-items:center; flex:0 0 24px; background: rgba(224,179,78,.16); border:1px solid rgba(224,179,78,.42); color: var(--gold-500); font-size: 11px; font-weight: 900; line-height:1; }
     .hamb { width:18px; display:grid; gap:4px; }
@@ -224,6 +228,7 @@
         <div class="actions">
           <label class="search"><span class="searchIcon"></span><input id="globalSearch" placeholder="Cari santri, guru, donatur, invoice..."></label>
           <select class="select" id="roleSelect"><option>Super Admin</option><option>Direktur</option><option>Kepala Pendidikan</option><option>Guru</option><option>Ustadz Pembimbing</option><option>Tim Kesehatan</option><option>Bendahara</option><option>Orang Tua</option></select>
+          <button class="ghost" data-action="workspace">Workspace</button>
           <button class="iconbtn" id="themeBtn" title="Dark/Light Mode"><span class="themeIcon"></span></button>
           <button class="iconbtn" id="notifBtn" title="Notifikasi"><span class="bellIcon"></span></button>
         </div>
@@ -310,7 +315,7 @@
       ownerEmail:'abuazka1510@gmail.com',
       spreadsheetId:'1ISqIvTpHNGRaITm0fV_44tVECoR7qBhQOUBUvDXtqPs',
       driveFolderId:'1Xb8w_VcjeVHSHQuKo1ob23M2wtfEhtdb',
-      appsScriptUrl:''
+      appsScriptUrl:localStorage.getItem('mdd_apps_script_url')||''
     };
     function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2300)}
     function setPage(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));nav.forEach(b=>b.classList.toggle('active',b.dataset.page===id));document.getElementById('sidebar').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('show');showToast('Membuka menu: '+document.querySelector('[data-page="'+id+'"]').innerText.replace(/[?????????]/g,'').trim())}
@@ -344,6 +349,30 @@
       await fetch(googleWorkspace.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
       return {ok:true};
     }
+    function workspaceHtml(){
+      return `<div class="workspace-status"><div><span>Email</span><b>${googleWorkspace.ownerEmail}</b></div><div><span>Spreadsheet ID</span><b>${googleWorkspace.spreadsheetId}</b></div><div><span>Folder Drive ID</span><b>${googleWorkspace.driveFolderId}</b></div></div><div class="form-section"><div class="form-field full"><label for="appsScriptUrl">URL Web App Apps Script</label><input class="select" id="appsScriptUrl" value="${escapeHtml(googleWorkspace.appsScriptUrl)}" placeholder="https://script.google.com/macros/s/.../exec"><span class="upload-note">Isi setelah backend Apps Script dideploy sebagai Web App.</span></div></div>`;
+    }
+    function saveWorkspaceConfig(){
+      const input=document.getElementById('appsScriptUrl');
+      googleWorkspace.appsScriptUrl=(input?.value||'').trim();
+      localStorage.setItem('mdd_apps_script_url',googleWorkspace.appsScriptUrl);
+      closeModal();showToast(googleWorkspace.appsScriptUrl?'Workspace tersambung ke Apps Script':'URL Apps Script dikosongkan');
+    }
+    function openWorkspaceModal(){openModal('Google Workspace',workspaceHtml(),'Simpan');document.getElementById('modalOk').onclick=saveWorkspaceConfig}
+    function attendanceUrl(){
+      if(!googleWorkspace.appsScriptUrl)return '';
+      const url=new URL(googleWorkspace.appsScriptUrl);
+      url.searchParams.set('action','attendance');
+      url.searchParams.set('sesi','Pagi');
+      url.searchParams.set('token','mdd-absensi-pagi');
+      return url.toString();
+    }
+    function qrHtml(){
+      const url=attendanceUrl();
+      if(!url)return `<div class="qr qr-fallback">Masukkan URL Web App Apps Script pada menu Workspace terlebih dahulu.</div><p class="label" style="text-align:center">QR aktif setelah backend Apps Script dideploy.</p>`;
+      const qr='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(url);
+      return `<img class="qr" src="${qr}" alt="QR Absensi"><p class="label" style="text-align:center">Scan untuk membuka form absensi sesi pagi.</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px"><a class="ghost" href="${url}" target="_blank" rel="noopener" style="text-decoration:none">Buka Form</a><button class="ghost" data-copy-attendance="${escapeHtml(url)}">Salin URL</button></div>`;
+    }
     async function saveStudentFromForm(){
       const form=document.getElementById('studentForm');
       if(!form)return;
@@ -372,7 +401,7 @@
     function closeModal(){document.getElementById('modalBackdrop').classList.remove('show');document.getElementById('modal').classList.remove('show')}
     function exportCsv(){const rows=[['NIS','Nama','Kelas','Program','Status'],...students.map(s=>[s.nis,s.namaLengkap,s.kelas,s.programPendidikan,s.status])];const csv=rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='laporan-markaz-dakwah-digital.csv';a.click();showToast('File CSV laporan dibuat')}
     function randomize(){kpis[0][1]=1200+Math.floor(Math.random()*90);kpis[4][1]=(92+Math.floor(Math.random()*7))+'%';renderKpi();renderBars('barChart',charts.attendance.map(v=>Math.max(55,Math.min(99,v+Math.floor(Math.random()*8-3)))));showToast('Data realtime diperbarui')}
-    document.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.page)setPage(btn.dataset.page);if(btn.dataset.chart){document.querySelectorAll('[data-chart]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderBars('barChart',charts[btn.dataset.chart])}const a=btn.dataset.action;if(a==='refresh')randomize();if(a==='export')exportCsv();if(a==='import')openModal('Import Excel / CSV','<p class="label">Pilih file data santri, nilai, absensi, atau donasi. Pada versi production, data akan divalidasi sebelum masuk database.</p><input class="select" type="file" style="width:100%;margin-top:12px">','Upload');if(a==='qr')openModal('QR Code Absensi','<div class="qr"></div><p class="label" style="text-align:center">Scan untuk simulasi absensi santri realtime.</p>','Aktifkan');if(a==='add')openAddStudentModal();if(a==='detail')openModal('Detail Santri',detailHtml(students[Number(btn.dataset.index)]||{}),'Tutup');if(a==='notify')document.getElementById('notifPanel').classList.toggle('show')});
+    document.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.copyAttendance){navigator.clipboard?.writeText(btn.dataset.copyAttendance);showToast('URL absensi disalin');return}if(btn.dataset.page)setPage(btn.dataset.page);if(btn.dataset.chart){document.querySelectorAll('[data-chart]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderBars('barChart',charts[btn.dataset.chart])}const a=btn.dataset.action;if(a==='refresh')randomize();if(a==='export')exportCsv();if(a==='workspace')openWorkspaceModal();if(a==='import')openModal('Import Excel / CSV','<p class="label">Pilih file data santri, nilai, absensi, atau donasi. Pada versi production, data akan divalidasi sebelum masuk database.</p><input class="select" type="file" style="width:100%;margin-top:12px">','Upload');if(a==='qr')openModal('QR Code Absensi',qrHtml(),'Tutup');if(a==='add')openAddStudentModal();if(a==='detail')openModal('Detail Santri',detailHtml(students[Number(btn.dataset.index)]||{}),'Tutup');if(a==='notify')document.getElementById('notifPanel').classList.toggle('show')});
     document.getElementById('themeBtn').onclick=()=>{const app=document.getElementById('app');app.dataset.theme=app.dataset.theme==='dark'?'light':'dark';showToast('Tema '+app.dataset.theme+' aktif')};
     document.getElementById('notifBtn').onclick=()=>document.getElementById('notifPanel').classList.toggle('show');
     document.getElementById('menuBtn').onclick=()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('drawerBackdrop').classList.add('show')};

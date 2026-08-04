@@ -11,6 +11,7 @@ const DRIVE_FOLDER_SANTRI_ID = '1Xb8w_VcjeVHSHQuKo1ob23M2wtfEhtdb';
 function doGet(e) {
   const action = (e.parameter.action || '').toLowerCase();
   if (action === 'health') return jsonResponse({ ok: true, service: 'MDD Backend', time: new Date().toISOString() });
+  if (action === 'attendance') return attendancePage_(e);
   if (action === 'students') return jsonResponse({ ok: true, students: readStudents_() });
   return jsonResponse({ ok: true, message: 'Markaz Dakwah Digital backend aktif' });
 }
@@ -110,6 +111,59 @@ function recordAttendance_(data) {
   return { ok: true, message: 'Absensi tercatat', nis: data.nis };
 }
 
+function attendancePage_(e) {
+  const sesi = e.parameter.sesi || 'Pagi';
+  const token = e.parameter.token || '';
+  const html = `
+    <!doctype html>
+    <html lang="id">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Absensi Markaz Dakwah Digital</title>
+        <style>
+          :root{--navy:#09245a;--gold:#e0b34e;--line:#dbe6f5;--bg:#f5f8fd;--ink:#142033;--muted:#66758b}
+          *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+          main{min-height:100vh;display:grid;place-items:center;padding:18px}
+          form{width:min(520px,100%);background:white;border:1px solid var(--line);border-radius:10px;box-shadow:0 22px 60px rgba(9,36,90,.12);padding:20px}
+          h1{margin:0 0 8px;font-size:22px;color:var(--navy)}p{margin:0 0 16px;color:var(--muted);line-height:1.5}
+          label{display:grid;gap:6px;margin-top:12px;font-weight:700;font-size:13px;color:var(--muted)}
+          input,select,textarea,button{font:inherit}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px}
+          button{width:100%;margin-top:16px;border:0;border-radius:8px;background:linear-gradient(135deg,#1454b8,#09245a);color:white;font-weight:800;padding:12px}
+          .msg{margin-top:12px;font-weight:700}.ok{color:#0f8a61}.bad{color:#c2410c}
+        </style>
+      </head>
+      <body>
+        <main>
+          <form id="attendanceForm">
+            <h1>Absensi Santri</h1>
+            <p>Markaz Dakwah Digital · Sesi ${escapeHtml_(sesi)}</p>
+            <label>NIS<input name="nis" required autocomplete="off"></label>
+            <label>Nama Lengkap<input name="namaLengkap" required></label>
+            <label>Kelas<input name="kelas"></label>
+            <label>Status<select name="statusAbsensi"><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alpa</option></select></label>
+            <label>Catatan<textarea name="catatan" rows="3"></textarea></label>
+            <button type="submit">Kirim Absensi</button>
+            <div class="msg" id="msg"></div>
+          </form>
+        </main>
+        <script>
+          const form=document.getElementById('attendanceForm'),msg=document.getElementById('msg');
+          form.addEventListener('submit',async e=>{
+            e.preventDefault(); msg.textContent='Mengirim absensi...'; msg.className='msg';
+            const data=Object.fromEntries(new FormData(form).entries());
+            data.sesi=${JSON.stringify(sesi)}; data.qrToken=${JSON.stringify(token)}; data.metode='QR'; data.perangkat=navigator.userAgent;
+            try{
+              const res=await fetch(location.href.split('?')[0],{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type:'attendance.scan',data})});
+              const json=await res.json(); msg.textContent=json.message||'Absensi diproses'; msg.className='msg '+(json.ok?'ok':'bad'); if(json.ok)form.reset();
+            }catch(err){msg.textContent='Gagal mengirim absensi. Coba lagi.'; msg.className='msg bad'}
+          });
+        </script>
+      </body>
+    </html>`;
+  return HtmlService.createHtmlOutput(html).setTitle('Absensi Markaz Dakwah Digital');
+}
+
 function readStudents_() {
   const sheet = getSpreadsheet_().getSheetByName(SHEETS.SANTRI);
   const values = sheet.getDataRange().getValues();
@@ -139,4 +193,10 @@ function jsonResponse(body, statusCode) {
   const output = ContentService.createTextOutput(JSON.stringify(body));
   output.setMimeType(ContentService.MimeType.JSON);
   return output;
+}
+
+function escapeHtml_(value) {
+  return String(value || '').replace(/[&<>"']/g, function(ch) {
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+  });
 }
