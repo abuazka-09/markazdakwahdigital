@@ -22,7 +22,7 @@ function doGet(e) {
     });
   }
 
-  if (action === 'attendanceSummary') {
+  if (action === 'attendancesummary') {
     var summary = readAttendanceSummary_(e.parameter || {});
     var callback = e.parameter && e.parameter.callback;
     if (callback) {
