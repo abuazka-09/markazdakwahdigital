@@ -137,7 +137,7 @@ function attendancePage_(e) {
         <main>
           <form id="attendanceForm">
             <h1>Absensi Santri</h1>
-            <p>Markaz Dakwah Digital · Sesi ${escapeHtml_(sesi)}</p>
+            <p>Markaz Dakwah Digital - Sesi ${escapeHtml_(sesi)}</p>
             <label>NIS<input name="nis" required autocomplete="off"></label>
             <label>Nama Lengkap<input name="namaLengkap" required></label>
             <label>Kelas<input name="kelas"></label>
