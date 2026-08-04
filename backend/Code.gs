@@ -22,10 +22,19 @@ function doGet(e) {
     });
   }
 
+  if (action === 'attendanceSummary') {
+    var summary = readAttendanceSummary_(e.parameter || {});
+    var callback = e.parameter && e.parameter.callback;
+    if (callback) {
+      return javascriptResponse(callback + '(' + JSON.stringify(summary) + ');');
+    }
+    return jsonResponse(summary);
+  }
+
   return jsonResponse({
     ok: true,
     message: 'Markaz Dakwah Digital backend aktif',
-    actions: ['health', 'attendance', 'students']
+    actions: ['health', 'attendance', 'students', 'attendanceSummary']
   });
 }
 
@@ -308,6 +317,112 @@ function readStudents_() {
   return students;
 }
 
+function readAttendanceSummary_(parameter) {
+  var timezone = Session.getScriptTimeZone() || 'Asia/Jakarta';
+  var targetDate = parameter.date || Utilities.formatDate(new Date(), timezone, 'yyyy-MM-dd');
+  var sheet = getSpreadsheet_().getSheetByName(SHEETS.ABSENSI);
+  ensureHeaders_(sheet, [
+    'Timestamp',
+    'Hari',
+    'Tanggal',
+    'Jam',
+    'Sesi',
+    'Peran',
+    'Nomor Induk',
+    'NIS',
+    'Nama Lengkap',
+    'Kelas',
+    'Jabatan',
+    'Tipe Absen',
+    'Status Absensi',
+    'Metode',
+    'Token QR',
+    'QR Token',
+    'Perangkat',
+    'Catatan'
+  ]);
+
+  var values = sheet.getDataRange().getValues();
+  if (values.length <= 1) {
+    return emptyAttendanceSummary_(targetDate);
+  }
+
+  var headers = values.shift();
+  var dateIdx = headers.indexOf('Tanggal');
+  var timeIdx = headers.indexOf('Jam');
+  var roleIdx = headers.indexOf('Peran');
+  var typeIdx = headers.indexOf('Tipe Absen');
+  var statusIdx = headers.indexOf('Status Absensi');
+  var nameIdx = headers.indexOf('Nama Lengkap');
+  var idIdx = headers.indexOf('Nomor Induk');
+  var nisIdx = headers.indexOf('NIS');
+  var unitIdx = headers.indexOf('Kelas');
+  var jabatanIdx = headers.indexOf('Jabatan');
+
+  var summary = emptyAttendanceSummary_(targetDate);
+
+  for (var i = 0; i < values.length; i += 1) {
+    var row = values[i];
+    var rowDate = normalizeDateText_(row[dateIdx], timezone);
+    if (rowDate !== targetDate) {
+      continue;
+    }
+
+    var role = String(roleIdx >= 0 && row[roleIdx] ? row[roleIdx] : 'Santri');
+    var bucket = role === 'Santri' ? summary.santri : summary.civitas;
+    var type = String(typeIdx >= 0 && row[typeIdx] ? row[typeIdx] : row[statusIdx] || 'Masuk');
+    var isOut = type.toLowerCase() === 'keluar';
+    var item = {
+      waktu: formatTimeText_(row[timeIdx], timezone),
+      nama: String(row[nameIdx] || '-'),
+      identitas: String((idIdx >= 0 && row[idIdx]) || row[nisIdx] || '-'),
+      peran: role,
+      unit: String(row[unitIdx] || ''),
+      jabatan: String(jabatanIdx >= 0 ? row[jabatanIdx] || '' : ''),
+      tipe: type,
+      status: String(row[statusIdx] || type)
+    };
+
+    bucket.total += 1;
+    if (isOut) {
+      bucket.keluar += 1;
+    } else {
+      bucket.masuk += 1;
+    }
+
+    if (bucket.terbaru.length < 6) {
+      bucket.terbaru.push(item);
+    }
+  }
+
+  summary.updatedAt = Utilities.formatDate(new Date(), timezone, 'yyyy-MM-dd HH:mm:ss');
+  return summary;
+}
+
+function emptyAttendanceSummary_(dateText) {
+  return {
+    ok: true,
+    date: dateText,
+    updatedAt: '',
+    santri: { total: 0, masuk: 0, keluar: 0, terbaru: [] },
+    civitas: { total: 0, masuk: 0, keluar: 0, terbaru: [] }
+  };
+}
+
+function normalizeDateText_(value, timezone) {
+  if (Object.prototype.toString.call(value) === '[object Date]') {
+    return Utilities.formatDate(value, timezone, 'yyyy-MM-dd');
+  }
+  return String(value || '').slice(0, 10);
+}
+
+function formatTimeText_(value, timezone) {
+  if (Object.prototype.toString.call(value) === '[object Date]') {
+    return Utilities.formatDate(value, timezone, 'HH:mm:ss');
+  }
+  return String(value || '-');
+}
+
 function appendByHeaders_(sheet, record) {
   if (!sheet) {
     throw new Error('Sheet tujuan tidak ditemukan.');
@@ -377,6 +492,12 @@ function isDuplicateAttendance_(sheet, dateText, sesi, nis, tipeAbsen) {
 function jsonResponse(body) {
   var output = ContentService.createTextOutput(JSON.stringify(body));
   output.setMimeType(ContentService.MimeType.JSON);
+  return output;
+}
+
+function javascriptResponse(source) {
+  var output = ContentService.createTextOutput(source);
+  output.setMimeType(ContentService.MimeType.JAVASCRIPT);
   return output;
 }
 
