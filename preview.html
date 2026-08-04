@@ -315,7 +315,7 @@
       ownerEmail:'abuazka1510@gmail.com',
       spreadsheetId:'1ISqIvTpHNGRaITm0fV_44tVECoR7qBhQOUBUvDXtqPs',
       driveFolderId:'1Xb8w_VcjeVHSHQuKo1ob23M2wtfEhtdb',
-      appsScriptUrl:localStorage.getItem('mdd_apps_script_url')||''
+      appsScriptUrl:localStorage.getItem('mdd_apps_script_url')||'https://script.google.com/macros/s/AKfycbwQ4773ykwvCCSLXiT6RRI0QabN-aKYxHMAbtWHI8kVnk77vFlvHKWQxq6Cw5_AdizfaQ/exec'
     };
     function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2300)}
     function setPage(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));nav.forEach(b=>b.classList.toggle('active',b.dataset.page===id));document.getElementById('sidebar').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('show');showToast('Membuka menu: '+document.querySelector('[data-page="'+id+'"]').innerText.replace(/[?????????]/g,'').trim())}
