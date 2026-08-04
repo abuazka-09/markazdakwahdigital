@@ -233,7 +233,6 @@
         <div class="actions">
           <label class="search"><span class="searchIcon"></span><input id="globalSearch" placeholder="Cari santri, guru, donatur, invoice..."></label>
           <select class="select" id="roleSelect"><option>Super Admin</option><option>Direktur</option><option>Kepala Pendidikan</option><option>Guru</option><option>Ustadz Pembimbing</option><option>Tim Kesehatan</option><option>Bendahara</option><option>Orang Tua</option></select>
-          <button class="ghost" data-action="workspace">Workspace</button>
           <button class="iconbtn" id="themeBtn" title="Dark/Light Mode"><span class="themeIcon"></span></button>
           <button class="iconbtn" id="notifBtn" title="Notifikasi"><span class="bellIcon"></span></button>
         </div>
@@ -368,15 +367,15 @@
       if(!googleWorkspace.appsScriptUrl)return '';
       const url=new URL(googleWorkspace.appsScriptUrl);
       url.searchParams.set('action','attendance');
-      url.searchParams.set('sesi','Pagi');
+      url.searchParams.set('sesi','Operasional');
       url.searchParams.set('token','mdd-absensi-pagi');
       return url.toString();
     }
     function qrHtml(){
       const url=attendanceUrl();
-      if(!url)return `<div class="qr qr-fallback">Masukkan URL Web App Apps Script pada menu Workspace terlebih dahulu.</div><p class="label" style="text-align:center">QR aktif setelah backend Apps Script dideploy.</p>`;
+      if(!url)return `<div class="qr qr-fallback">Backend Apps Script belum aktif.</div><p class="label" style="text-align:center">QR aktif setelah backend Apps Script dideploy.</p>`;
       const qr='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(url);
-      return `<img class="qr" src="${qr}" alt="QR Absensi"><p class="label" style="text-align:center">Scan untuk membuka form absensi sesi pagi.</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px"><a class="ghost" href="${url}" target="_blank" rel="noopener" style="text-decoration:none">Buka Form</a><button class="ghost" data-copy-attendance="${escapeHtml(url)}">Salin URL</button></div>`;
+      return `<img class="qr" src="${qr}" alt="QR Absensi"><p class="label" style="text-align:center">Scan untuk absensi masuk/keluar seluruh civitas Markaz Dakwah Digital. Hari, tanggal, dan jam dicatat otomatis.</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px"><a class="ghost" href="${url}" target="_blank" rel="noopener" style="text-decoration:none">Buka Form</a><button class="ghost" data-copy-attendance="${escapeHtml(url)}">Salin URL</button></div>`;
     }
     async function saveStudentFromForm(){
       const form=document.getElementById('studentForm');
@@ -406,7 +405,7 @@
     function closeModal(){document.getElementById('modalBackdrop').classList.remove('show');document.getElementById('modal').classList.remove('show')}
     function exportCsv(){const rows=[['NIS','Nama','Kelas','Program','Status'],...students.map(s=>[s.nis,s.namaLengkap,s.kelas,s.programPendidikan,s.status])];const csv=rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='laporan-markaz-dakwah-digital.csv';a.click();showToast('File CSV laporan dibuat')}
     function randomize(){kpis[0][1]=1200+Math.floor(Math.random()*90);kpis[4][1]=(92+Math.floor(Math.random()*7))+'%';renderKpi();renderBars('barChart',charts.attendance.map(v=>Math.max(55,Math.min(99,v+Math.floor(Math.random()*8-3)))));showToast('Data realtime diperbarui')}
-    document.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.copyAttendance){navigator.clipboard?.writeText(btn.dataset.copyAttendance);showToast('URL absensi disalin');return}if(btn.dataset.page)setPage(btn.dataset.page);if(btn.dataset.chart){document.querySelectorAll('[data-chart]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderBars('barChart',charts[btn.dataset.chart])}const a=btn.dataset.action;if(a==='refresh')randomize();if(a==='export')exportCsv();if(a==='workspace')openWorkspaceModal();if(a==='import')openModal('Import Excel / CSV','<p class="label">Pilih file data santri, nilai, absensi, atau donasi. Pada versi production, data akan divalidasi sebelum masuk database.</p><input class="select" type="file" style="width:100%;margin-top:12px">','Upload');if(a==='qr')openModal('QR Code Absensi',qrHtml(),'Tutup');if(a==='add')openAddStudentModal();if(a==='detail')openModal('Detail Santri',detailHtml(students[Number(btn.dataset.index)]||{}),'Tutup');if(a==='notify')document.getElementById('notifPanel').classList.toggle('show')});
+    document.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.copyAttendance){navigator.clipboard?.writeText(btn.dataset.copyAttendance);showToast('URL absensi disalin');return}if(btn.dataset.page)setPage(btn.dataset.page);if(btn.dataset.chart){document.querySelectorAll('[data-chart]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderBars('barChart',charts[btn.dataset.chart])}const a=btn.dataset.action;if(a==='refresh')randomize();if(a==='export')exportCsv();if(a==='import')openModal('Import Excel / CSV','<p class="label">Pilih file data santri, nilai, absensi, atau donasi. Pada versi production, data akan divalidasi sebelum masuk database.</p><input class="select" type="file" style="width:100%;margin-top:12px">','Upload');if(a==='qr')openModal('QR Code Absensi',qrHtml(),'Tutup');if(a==='add')openAddStudentModal();if(a==='detail')openModal('Detail Santri',detailHtml(students[Number(btn.dataset.index)]||{}),'Tutup');if(a==='notify')document.getElementById('notifPanel').classList.toggle('show')});
     document.getElementById('themeBtn').onclick=()=>{const app=document.getElementById('app');app.dataset.theme=app.dataset.theme==='dark'?'light':'dark';showToast('Tema '+app.dataset.theme+' aktif')};
     document.getElementById('notifBtn').onclick=()=>document.getElementById('notifPanel').classList.toggle('show');
     document.getElementById('menuBtn').onclick=()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('drawerBackdrop').classList.add('show')};

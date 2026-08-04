@@ -140,40 +140,71 @@ function createStudent_(data) {
 }
 
 function recordAttendance_(data) {
-  var nis = String(data.nis || '').trim();
+  var peran = String(data.peran || 'Santri').trim();
+  var tipeAbsen = String(data.tipeAbsen || data.statusAbsensi || 'Masuk').trim();
+  var identifier = String(data.nomorInduk || data.nis || data.idPegawai || '').trim();
+  var nis = identifier;
   var nama = String(data.namaLengkap || '').trim();
 
-  if (!nis || !nama) {
-    throw new Error('NIS dan Nama Lengkap wajib diisi.');
+  if (!identifier || !nama) {
+    throw new Error('Nomor identitas dan Nama Lengkap wajib diisi.');
   }
 
   var ss = getSpreadsheet_();
   var sheet = ss.getSheetByName(SHEETS.ABSENSI);
+  ensureHeaders_(sheet, [
+    'Timestamp',
+    'Hari',
+    'Tanggal',
+    'Jam',
+    'Sesi',
+    'Peran',
+    'Nomor Induk',
+    'NIS',
+    'Nama Lengkap',
+    'Kelas',
+    'Jabatan',
+    'Tipe Absen',
+    'Status Absensi',
+    'Metode',
+    'Token QR',
+    'QR Token',
+    'Perangkat',
+    'Catatan'
+  ]);
+
   var now = new Date();
   var timezone = Session.getScriptTimeZone() || 'Asia/Jakarta';
+  var dayText = Utilities.formatDate(now, timezone, 'EEEE');
   var dateText = Utilities.formatDate(now, timezone, 'yyyy-MM-dd');
   var timeText = Utilities.formatDate(now, timezone, 'HH:mm:ss');
-  var sesi = data.sesi || 'Pagi';
+  var sesi = data.sesi || 'Operasional';
 
-  if (isDuplicateAttendance_(sheet, dateText, sesi, nis)) {
+  if (isDuplicateAttendance_(sheet, dateText, sesi, identifier, tipeAbsen)) {
     return {
       ok: true,
       duplicate: true,
-      message: 'Absensi santri ini sudah tercatat untuk sesi ' + sesi + ' hari ini.'
+      message: 'Absensi ' + tipeAbsen + ' untuk ' + nama + ' sudah tercatat hari ini.'
     };
   }
 
   appendByHeaders_(sheet, {
     'Timestamp': now,
+    'Hari': dayText,
     'Tanggal': dateText,
     'Jam': timeText,
     'Sesi': sesi,
+    'Peran': peran,
+    'Nomor Induk': identifier,
     'NIS': nis,
     'Nama Lengkap': nama,
     'Kelas': data.kelas || '',
-    'Status Absensi': data.statusAbsensi || 'Hadir',
+    'Jabatan': data.jabatan || peran,
+    'Tipe Absen': tipeAbsen,
+    'Status Absensi': data.statusAbsensi || tipeAbsen,
     'Metode': data.metode || 'QR',
     'Token QR': data.qrToken || '',
+    'QR Token': data.qrToken || '',
     'Perangkat': data.perangkat || '',
     'Catatan': data.catatan || ''
   });
@@ -182,7 +213,10 @@ function recordAttendance_(data) {
     ok: true,
     message: 'Absensi berhasil tercatat.',
     nis: nis,
+    peran: peran,
+    tipeAbsen: tipeAbsen,
     sesi: sesi,
+    hari: dayText,
     tanggal: dateText,
     jam: timeText
   };
@@ -190,7 +224,7 @@ function recordAttendance_(data) {
 
 function attendancePage_(e) {
   var parameter = e && e.parameter ? e.parameter : {};
-  var sesi = parameter.sesi || 'Pagi';
+  var sesi = parameter.sesi || 'Operasional';
   var token = parameter.token || '';
   var html = [
     '<!doctype html>',
@@ -198,7 +232,7 @@ function attendancePage_(e) {
     '<head>',
     '<base target="_top">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<title>Absensi Markaz Dakwah Digital</title>',
+    '<title>Absensi Civitas Markaz Dakwah Digital</title>',
     '<style>',
     ':root{--navy:#09245a;--gold:#e0b34e;--line:#dbe6f5;--bg:#f5f8fd;--ink:#142033;--muted:#66758b}',
     '*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}',
@@ -214,12 +248,15 @@ function attendancePage_(e) {
     '<body>',
     '<main>',
     '<form id="attendanceForm">',
-    '<h1>Absensi Santri</h1>',
-    '<p>Markaz Dakwah Digital - Sesi ' + escapeHtml_(sesi) + '</p>',
-    '<label>NIS<input name="nis" required autocomplete="off"></label>',
+    '<h1>Absensi Civitas</h1>',
+    '<p>Markaz Dakwah Digital - Sesi ' + escapeHtml_(sesi) + '. Hari, tanggal, dan jam dicatat otomatis oleh sistem.</p>',
+    '<label>Peran<select name="peran"><option>Santri</option><option>Super Admin</option><option>Direktur</option><option>Kepala Pendidikan</option><option>Guru</option><option>Ustadz Pembimbing</option><option>Tim Kesehatan</option><option>Bendahara</option></select></label>',
+    '<label>Jenis Absen<select name="tipeAbsen"><option>Masuk</option><option>Keluar</option></select></label>',
+    '<label>NIS / ID / Nomor HP<input name="nomorInduk" required autocomplete="off"></label>',
     '<label>Nama Lengkap<input name="namaLengkap" required></label>',
-    '<label>Kelas<input name="kelas"></label>',
-    '<label>Status<select name="statusAbsensi"><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alpa</option></select></label>',
+    '<label>Kelas / Unit<input name="kelas"></label>',
+    '<label>Jabatan<input name="jabatan"></label>',
+    '<label>Keterangan<select name="statusAbsensi"><option>Hadir</option><option>Dinas</option><option>Izin</option><option>Sakit</option><option>Alpa</option></select></label>',
     '<label>Catatan<textarea name="catatan" rows="3"></textarea></label>',
     '<button type="submit">Kirim Absensi</button>',
     '<div class="msg" id="msg"></div>',
@@ -240,7 +277,7 @@ function attendancePage_(e) {
     '</html>'
   ].join('');
 
-  return HtmlService.createHtmlOutput(html).setTitle('Absensi Markaz Dakwah Digital');
+  return HtmlService.createHtmlOutput(html).setTitle('Absensi Civitas Markaz Dakwah Digital');
 }
 
 function readStudents_() {
@@ -285,11 +322,32 @@ function appendByHeaders_(sheet, record) {
   sheet.appendRow(row);
 }
 
+function ensureHeaders_(sheet, requiredHeaders) {
+  if (!sheet) {
+    throw new Error('Sheet tujuan tidak ditemukan.');
+  }
+
+  var lastColumn = Math.max(sheet.getLastColumn(), 1);
+  var headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+  var changed = false;
+
+  for (var i = 0; i < requiredHeaders.length; i += 1) {
+    if (headers.indexOf(requiredHeaders[i]) === -1) {
+      headers.push(requiredHeaders[i]);
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+}
+
 function getSpreadsheet_() {
   return SpreadsheetApp.openById(SPREADSHEET_ID);
 }
 
-function isDuplicateAttendance_(sheet, dateText, sesi, nis) {
+function isDuplicateAttendance_(sheet, dateText, sesi, nis, tipeAbsen) {
   var rows = sheet.getDataRange().getValues();
   if (rows.length <= 1) {
     return false;
@@ -299,10 +357,14 @@ function isDuplicateAttendance_(sheet, dateText, sesi, nis) {
   var dateIdx = headers.indexOf('Tanggal');
   var sesiIdx = headers.indexOf('Sesi');
   var nisIdx = headers.indexOf('NIS');
+  var nomorIdx = headers.indexOf('Nomor Induk');
+  var tipeIdx = headers.indexOf('Tipe Absen');
 
   for (var i = 0; i < rows.length; i += 1) {
     var row = rows[i];
-    if (String(row[dateIdx]).slice(0, 10) === dateText && row[sesiIdx] === sesi && String(row[nisIdx]) === nis) {
+    var rowIdentity = nomorIdx >= 0 && row[nomorIdx] ? row[nomorIdx] : row[nisIdx];
+    var rowType = tipeIdx >= 0 && row[tipeIdx] ? row[tipeIdx] : row[headers.indexOf('Status Absensi')];
+    if (String(row[dateIdx]).slice(0, 10) === dateText && row[sesiIdx] === sesi && String(rowIdentity) === nis && String(rowType) === tipeAbsen) {
       return true;
     }
   }
