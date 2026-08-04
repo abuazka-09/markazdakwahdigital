@@ -343,7 +343,7 @@
     function escapeHtml(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
     function renderAttendanceBox(id,data){
       const el=document.getElementById(id);
-      const rows=(data.terbaru||[]).map(x=>`<div class="attendance-row"><div><b>${escapeHtml(x.nama)}</b><small>${escapeHtml(x.identitas)} · ${escapeHtml(x.peran)}${x.unit?' · '+escapeHtml(x.unit):''}</small></div><div style="text-align:right"><b>${escapeHtml(x.tipe)}</b><small>${escapeHtml(x.waktu)}</small></div></div>`).join('');
+      const rows=(data.terbaru||[]).map(x=>`<div class="attendance-row"><div><b>${escapeHtml(x.nama)}</b><small>${escapeHtml(x.identitas)} · ${escapeHtml(x.peran)}${x.unit?' · '+escapeHtml(x.unit):''}${x.jabatan?' · '+escapeHtml(x.jabatan):''}</small><small>${escapeHtml(x.status||'-')}${x.catatan?' · '+escapeHtml(x.catatan):''}</small></div><div style="text-align:right"><b>${escapeHtml(x.tipe)}</b><small>${escapeHtml(x.tanggal||'')} ${escapeHtml(x.waktu||'')}</small></div></div>`).join('');
       el.innerHTML=`<div class="attendance-stats"><div class="attendance-stat"><span class="label">Total</span><b>${data.total||0}</b></div><div class="attendance-stat"><span class="label">Masuk</span><b>${data.masuk||0}</b></div><div class="attendance-stat"><span class="label">Keluar</span><b>${data.keluar||0}</b></div></div>${rows?`<div class="attendance-list">${rows}</div>`:'<div class="empty">Belum ada absensi hari ini.</div>'}`;
     }
     function renderAttendanceSummary(summary){

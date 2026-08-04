@@ -373,6 +373,8 @@ function readAttendanceSummary_(parameter) {
     var type = String(typeIdx >= 0 && row[typeIdx] ? row[typeIdx] : row[statusIdx] || 'Masuk');
     var isOut = type.toLowerCase() === 'keluar';
     var item = {
+      hari: String(row[headers.indexOf('Hari')] || ''),
+      tanggal: rowDate,
       waktu: formatTimeText_(row[timeIdx], timezone),
       nama: String(row[nameIdx] || '-'),
       identitas: String((idIdx >= 0 && row[idIdx]) || row[nisIdx] || '-'),
@@ -380,7 +382,8 @@ function readAttendanceSummary_(parameter) {
       unit: String(row[unitIdx] || ''),
       jabatan: String(jabatanIdx >= 0 ? row[jabatanIdx] || '' : ''),
       tipe: type,
-      status: String(row[statusIdx] || type)
+      status: String(row[statusIdx] || type),
+      catatan: String(row[headers.indexOf('Catatan')] || '')
     };
 
     bucket.total += 1;
