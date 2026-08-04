@@ -73,6 +73,10 @@ function mddSmokeTest() {
   return response.getContent();
 }
 
+function submitAttendanceFromPage(data) {
+  return recordAttendance_(data || {});
+}
+
 function createStudent_(data) {
   if (!data.nis || !data.namaLengkap) {
     throw new Error('NIS dan Nama Lengkap wajib diisi.');
@@ -268,9 +272,7 @@ function attendancePage_(e) {
     'evt.preventDefault();msg.textContent="Mengirim absensi...";msg.className="msg";',
     'var fd=new FormData(form);var data={};fd.forEach(function(value,key){data[key]=value;});',
     'data.sesi=' + JSON.stringify(sesi) + ';data.qrToken=' + JSON.stringify(token) + ';data.metode="QR";data.perangkat=navigator.userAgent;',
-    'fetch(location.href.split("?")[0],{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({type:"attendance.scan",data:data})})',
-    '.then(function(res){return res.json();}).then(function(json){msg.textContent=json.message||"Absensi diproses";msg.className="msg "+(json.ok?"ok":"bad");if(json.ok){form.reset();}})',
-    '.catch(function(){msg.textContent="Gagal mengirim absensi. Coba lagi.";msg.className="msg bad";});',
+    'google.script.run.withSuccessHandler(function(json){msg.textContent=json.message||"Absensi diproses";msg.className="msg "+(json.ok?"ok":"bad");if(json.ok){form.reset();}}).withFailureHandler(function(err){msg.textContent=(err&&err.message)?err.message:"Gagal mengirim absensi. Coba lagi.";msg.className="msg bad";}).submitAttendanceFromPage(data);',
     '});',
     '</script>',
     '</body>',
