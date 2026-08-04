@@ -1,0 +1,25 @@
+{
+  "name": "Markaz Dakwah Digital",
+  "short_name": "MDD",
+  "description": "Dashboard operasional realtime Markaz Dakwah Digital.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f8fd",
+  "theme_color": "#09245a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./apps/web/public/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./apps/web/public/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
