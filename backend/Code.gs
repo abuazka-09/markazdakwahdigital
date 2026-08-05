@@ -25,10 +25,15 @@ function doGet(e) {
   }
 
   if (action === 'students') {
-    return jsonResponse({
+    var studentsPayload = {
       ok: true,
       students: readStudents_()
-    });
+    };
+    var studentsCallback = e.parameter && e.parameter.callback;
+    if (studentsCallback) {
+      return javascriptResponse(studentsCallback + '(' + JSON.stringify(studentsPayload) + ');');
+    }
+    return jsonResponse(studentsPayload);
   }
 
   if (action === 'attendancesummary') {
@@ -56,6 +61,10 @@ function doPost(e) {
 
     if (type === 'student.create') {
       return jsonResponse(createStudent_(data));
+    }
+
+    if (type === 'student.update') {
+      return jsonResponse(updateStudent_(data));
     }
 
     if (type === 'attendance.scan') {
@@ -232,6 +241,83 @@ function createStudent_(data) {
     ok: true,
     message: 'Data santri berhasil disimpan ke Google Workspace.',
     nis: data.nis
+  };
+}
+
+function updateStudent_(data) {
+  if (!data.kodeSantriMdd || !data.nis || !data.namaLengkap) {
+    throw new Error('Kode Santri MDD, NIS, dan Nama Lengkap wajib diisi.');
+  }
+
+  var ss = getSpreadsheet_();
+  var sheet = ss.getSheetByName(SHEETS.SANTRI);
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var values = sheet.getDataRange().getValues();
+  var codeIdx = headers.indexOf('Kode Santri MDD');
+  var nisIdx = headers.indexOf('NIS');
+  var target = normalizeCode_(data.originalStudentKey || data.kodeSantriMdd || data.nis);
+  var targetRow = -1;
+
+  for (var i = 1; i < values.length; i += 1) {
+    var row = values[i];
+    if (normalizeCode_(row[codeIdx]) === target || normalizeCode_(row[nisIdx]) === target || normalizeCode_(row[codeIdx]) === normalizeCode_(data.kodeSantriMdd) || normalizeCode_(row[nisIdx]) === normalizeCode_(data.nis)) {
+      targetRow = i + 1;
+      break;
+    }
+  }
+
+  if (targetRow === -1) {
+    return createStudent_(data);
+  }
+
+  var record = studentRecord_(data, new Date());
+  for (var c = 0; c < headers.length; c += 1) {
+    var header = headers[c];
+    if (Object.prototype.hasOwnProperty.call(record, header)) {
+      sheet.getRange(targetRow, c + 1).setValue(record[header]);
+    }
+  }
+
+  return {
+    ok: true,
+    message: 'Data santri berhasil diperbarui.',
+    kodeSantriMdd: data.kodeSantriMdd,
+    nis: data.nis
+  };
+}
+
+function normalizeCode_(value) {
+  return String(value || '').trim().replace(/\s+/g, '').toLowerCase();
+}
+
+function studentRecord_(data, now) {
+  return {
+    'Timestamp': now,
+    'Foto URL': data.fotoUrl || data.foto || '',
+    'Kode Santri MDD': data.kodeSantriMdd || '',
+    'NIS': data.nis,
+    'Nama Lengkap': data.namaLengkap,
+    'Nama Panggilan': data.namaPanggilan || '',
+    'Tempat Lahir': data.tempatLahir || '',
+    'Tanggal Lahir': data.tanggalLahir || '',
+    'Jenis Kelamin': data.jenisKelamin || '',
+    'Alamat': data.alamat || '',
+    'Nomor HP Santri': data.hpSantri || '',
+    'Email Aktif': data.email || '',
+    'Golongan Darah': data.golonganDarah || '',
+    'Riwayat Penyakit': data.riwayatPenyakit || '',
+    'Alergi': data.alergi || '',
+    'Status': data.status || 'Aktif',
+    'Tanggal Masuk': data.tanggalMasuk || '',
+    'Program Pendidikan': data.programPendidikan || '',
+    'Kelas': data.kelas || '',
+    'Wali Kelas': data.waliKelas || '',
+    'Ustadz Pembimbing': data.ustadzPembimbing || '',
+    'Jumlah Saudara': data.jumlahSaudara || '',
+    'Anak Ke': data.anakKe || '',
+    'Hobi': data.hobi || '',
+    'Cita-cita': data.citaCita || '',
+    'Bakat': data.bakat || ''
   };
 }
 
