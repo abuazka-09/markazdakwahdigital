@@ -110,6 +110,10 @@
     .hero:after { width:260px; height:260px; right:-70px; bottom:-120px; }
     .hero h2 { margin: 8px 0 10px; max-width: 720px; font-size: 34px; line-height:1.08; color:white; }
     .hero p { margin:0; color:#d9e8ff; line-height:1.65; }
+    .time-panel { position:relative; z-index:1; margin-top:16px; width:min(440px,100%); display:grid; gap:5px; border:1px solid rgba(255,255,255,.22); border-radius:10px; background:rgba(255,255,255,.12); padding:13px; }
+    .time-panel span { color:#d9e8ff; font-size:13px; font-weight:800; }
+    .time-panel strong { color:white; font-size:28px; letter-spacing:0; line-height:1; }
+    .time-panel small { color:#b9cff0; line-height:1.4; }
     .hero-logo { position:relative; z-index:1; align-self:center; justify-self:center; width:270px; height:170px; object-fit:contain; filter: drop-shadow(0 18px 25px rgba(0,0,0,.32)); }
     .badge { display:inline-flex; align-items:center; gap:8px; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:7px 11px; color:white; font-weight:800; font-size:13px; }
     .grid-kpi { display:grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; margin-top: 16px; }
@@ -281,7 +285,7 @@
 
       <section class="section active" id="dashboard">
         <div class="hero">
-          <div><span class="badge"><span class="pulseDot"></span> Realtime aktif</span><h2>Lembaga Pendidikan Islam Modern Markaz Dakwah Digital</h2><p><strong>(Inspired by Revelation. Driven by Innovation)</strong><br>Berilmu &bull; Beradab &bull; Berdampak</p><div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" data-action="refresh"><span class="btnIcon refreshIcon"></span> Refresh Data</button><button class="gold" data-action="export"><span class="btnIcon exportIcon"></span> Export CSV</button><button class="ghost" data-action="qr"><span class="btnIcon qrIcon"></span> QR Absensi</button></div></div>
+          <div><span class="badge"><span class="pulseDot"></span> Realtime aktif</span><h2>Lembaga Pendidikan Islam Modern Markaz Dakwah Digital</h2><p><strong>(Inspired by Revelation. Driven by Innovation)</strong><br>Berilmu &bull; Beradab &bull; Berdampak</p><div class="time-panel"><span id="dashboardDay">Memuat hari...</span><strong id="dashboardClock">--:--:--</strong><small id="dashboardDate">Zona waktu user</small></div><div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" data-action="refresh"><span class="btnIcon refreshIcon"></span> Refresh Data</button><button class="gold" data-action="export"><span class="btnIcon exportIcon"></span> Export CSV</button><button class="ghost" data-action="qr"><span class="btnIcon qrIcon"></span> QR Absensi</button></div></div>
           <img class="hero-logo" src="apps/web/public/logo-mdd.png" alt="Logo Markaz Dakwah Digital">
         </div>
         <div class="grid-kpi" id="kpiGrid"></div>
@@ -431,10 +435,24 @@
     function renderBars(id,data){document.getElementById(id).innerHTML=data.map((v,i)=>`<div class="bar" data-label="${labels[i]}" style="height:${Math.max(48,v*2.35)}px">${v}%</div>`).join('')}
     function renderCircles(id,data=circleData){document.getElementById(id).innerHTML=data.map(d=>`<div class="circle-card"><div class="donut" style="--p:${d[1]}"><strong>${d[1]}%</strong></div><b>${d[0]}</b><p class="label">Target semester</p></div>`).join('')}
     function renderFeed(id,items=feeds){document.getElementById(id).innerHTML=`<div class="feed">${items.map(x=>`<div><b>${x.split(':')[0]}</b><small>${x.split(':')[1]||'Update realtime'}</small></div>`).join('')}</div>`}
+    function userTimeZone(){return Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Jakarta'}
+    function updateDashboardClock(){
+      const tz=userTimeZone(),now=new Date();
+      const day=new Intl.DateTimeFormat('id-ID',{weekday:'long',timeZone:tz}).format(now);
+      const date=new Intl.DateTimeFormat('id-ID',{day:'2-digit',month:'long',year:'numeric',timeZone:tz}).format(now);
+      const time=new Intl.DateTimeFormat('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:tz}).format(now).replace(/\./g,':');
+      document.getElementById('dashboardDay').textContent=day;
+      document.getElementById('dashboardClock').textContent=time;
+      document.getElementById('dashboardDate').textContent=date+' · Zona waktu user: '+tz;
+    }
+    function startDashboardClock(){updateDashboardClock();setInterval(updateDashboardClock,1000)}
     function escapeHtml(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
     function renderAttendanceBox(id,data){
       const el=document.getElementById(id);
-      const rows=(data.terbaru||[]).map(x=>`<div class="attendance-row"><div><b>${escapeHtml(x.nama)}</b><small>${escapeHtml(x.identitas)} · ${escapeHtml(x.peran)}${x.unit?' · '+escapeHtml(x.unit):''}${x.jabatan?' · '+escapeHtml(x.jabatan):''}</small><small>${escapeHtml(x.status||'-')}${x.catatan?' · '+escapeHtml(x.catatan):''}</small></div><div style="text-align:right"><b>${escapeHtml(x.tipe)}</b><small>${escapeHtml(x.tanggal||'')} ${escapeHtml(x.waktu||'')}</small></div></div>`).join('');
+      const rows=(data.terbaru||[]).map(x=>{
+        const tanggal=x.tanggalLokal||x.tanggal||'',waktu=x.jamLokal||x.waktu||'',tz=x.zonaWaktuUser?' · '+x.zonaWaktuUser:'';
+        return `<div class="attendance-row"><div><b>${escapeHtml(x.nama)}</b><small>${escapeHtml(x.identitas)} · ${escapeHtml(x.peran)}${x.unit?' · '+escapeHtml(x.unit):''}${x.jabatan?' · '+escapeHtml(x.jabatan):''}</small><small>${escapeHtml(x.status||'-')}${x.catatan?' · '+escapeHtml(x.catatan):''}</small></div><div style="text-align:right"><b>${escapeHtml(x.tipe)}</b><small>${escapeHtml(tanggal)} ${escapeHtml(waktu)}${escapeHtml(tz)}</small></div></div>`;
+      }).join('');
       el.innerHTML=`<div class="attendance-stats"><div class="attendance-stat"><span class="label">Total</span><b>${data.total||0}</b></div><div class="attendance-stat"><span class="label">Masuk</span><b>${data.masuk||0}</b></div><div class="attendance-stat"><span class="label">Keluar</span><b>${data.keluar||0}</b></div></div>${rows?`<div class="attendance-list">${rows}</div>`:'<div class="empty">Belum ada absensi hari ini.</div>'}`;
     }
     function renderAttendanceSummary(summary){
@@ -451,7 +469,11 @@
       const callback='mddAttendanceSummary_'+Date.now();
       const script=document.createElement('script');
       const url=new URL(googleWorkspace.appsScriptUrl);
+      const tz=userTimeZone();
+      const localDate=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:tz}).format(new Date());
       url.searchParams.set('action','attendanceSummary');
+      url.searchParams.set('date',localDate);
+      url.searchParams.set('timeZoneUser',tz);
       url.searchParams.set('callback',callback);
       window[callback]=data=>{renderAttendanceSummary(data);delete window[callback];script.remove();};
       script.onerror=()=>{showToast('Ringkasan absensi belum dapat dimuat');delete window[callback];script.remove();};
@@ -548,7 +570,7 @@
     document.getElementById('drawerBackdrop').onclick=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('show')};
     document.getElementById('modalClose').onclick=closeModal;document.getElementById('modalBackdrop').onclick=closeModal;document.getElementById('modalOk').onclick=()=>{closeModal();showToast('Aksi berhasil diproses')};
     document.getElementById('globalSearch').oninput=e=>{const q=e.target.value.toLowerCase();if(!q)return;const found=students.filter(s=>Object.values(s).join(' ').toLowerCase().includes(q));if(found.length){setPage('santri');showToast(found.length+' data cocok ditemukan')}else showToast('Belum ada data cocok untuk: '+e.target.value)};
-    renderKpi();renderBars('barChart',charts.attendance);renderBars('academicChart',charts.academic);renderBars('healthChart',[70,72,76,80,79,84,87,89]);renderBars('financeChart',charts.finance);renderBars('biChart',[62,69,74,81,88,91,93,96]);renderCircles('circleReports');renderCircles('hafalanCircles',[['Al-Quran',78],['Hadits',64],['Kitab',71]]);renderCircles('donationCircles',[['Zakat',86],['Infaq',74],['Wakaf',83]]);renderCircles('biCircles',[['Prestasi',82],['Guru',91],['Donasi',88]]);renderFeed('hafalanFeed',['Ahmad Zaidan: Setor 2 halaman Surah Al-Kahfi','Fatimah Azzahra: Murajaah Juz 29 selesai']);renderFeed('healthFeed',['Kelas IX-B: Pemeriksaan BMI selesai','Tim Kesehatan: 3 santri perlu kontrol lanjutan']);renderTable();renderLists();loadAttendanceSummary();setupRoleLogin();
+    renderKpi();renderBars('barChart',charts.attendance);renderBars('academicChart',charts.academic);renderBars('healthChart',[70,72,76,80,79,84,87,89]);renderBars('financeChart',charts.finance);renderBars('biChart',[62,69,74,81,88,91,93,96]);renderCircles('circleReports');renderCircles('hafalanCircles',[['Al-Quran',78],['Hadits',64],['Kitab',71]]);renderCircles('donationCircles',[['Zakat',86],['Infaq',74],['Wakaf',83]]);renderCircles('biCircles',[['Prestasi',82],['Guru',91],['Donasi',88]]);renderFeed('hafalanFeed',['Ahmad Zaidan: Setor 2 halaman Surah Al-Kahfi','Fatimah Azzahra: Murajaah Juz 29 selesai']);renderFeed('healthFeed',['Kelas IX-B: Pemeriksaan BMI selesai','Tim Kesehatan: 3 santri perlu kontrol lanjutan']);renderTable();renderLists();loadAttendanceSummary();startDashboardClock();setupRoleLogin();
     if('serviceWorker' in navigator){
       window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
     }

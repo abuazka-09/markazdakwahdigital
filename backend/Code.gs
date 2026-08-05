@@ -11,6 +11,15 @@ function doGet(e) {
     });
   }
 
+  if (action === 'time') {
+    var timePayload = currentServerTime_();
+    var timeCallback = e.parameter && e.parameter.callback;
+    if (timeCallback) {
+      return javascriptResponse(timeCallback + '(' + JSON.stringify(timePayload) + ');');
+    }
+    return jsonResponse(timePayload);
+  }
+
   if (action === 'attendance') {
     return attendancePage_(e);
   }
@@ -203,6 +212,14 @@ function recordAttendance_(data) {
     'Hari',
     'Tanggal',
     'Jam',
+    'Hari Server',
+    'Tanggal Server',
+    'Jam Server',
+    'Zona Waktu User',
+    'Hari Lokal',
+    'Tanggal Lokal',
+    'Jam Lokal',
+    'Waktu Lokal ISO',
     'Sesi',
     'Peran',
     'Nomor Induk',
@@ -239,6 +256,14 @@ function recordAttendance_(data) {
     'Hari': dayText,
     'Tanggal': dateText,
     'Jam': timeText,
+    'Hari Server': dayText,
+    'Tanggal Server': dateText,
+    'Jam Server': timeText,
+    'Zona Waktu User': data.zonaWaktuUser || '',
+    'Hari Lokal': data.hariLokal || '',
+    'Tanggal Lokal': data.tanggalLokal || '',
+    'Jam Lokal': data.jamLokal || '',
+    'Waktu Lokal ISO': data.waktuLokalIso || '',
     'Sesi': sesi,
     'Peran': peran,
     'Nomor Induk': identifier,
@@ -264,7 +289,12 @@ function recordAttendance_(data) {
     sesi: sesi,
     hari: dayText,
     tanggal: dateText,
-    jam: timeText
+    jam: timeText,
+    zonaWaktuUser: data.zonaWaktuUser || '',
+    hariLokal: data.hariLokal || '',
+    tanggalLokal: data.tanggalLokal || '',
+    jamLokal: data.jamLokal || '',
+    zonaWaktuServer: timezone
   };
 }
 
@@ -288,6 +318,7 @@ function attendancePage_(e) {
     'label{display:grid;gap:6px;margin-top:12px;font-weight:700;font-size:13px;color:var(--muted)}',
     'input,select,textarea,button{font:inherit}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px}',
     'button{width:100%;margin-top:16px;border:0;border-radius:8px;background:#09245a;color:white;font-weight:800;padding:12px}',
+    '.timebox{margin:10px 0 16px;padding:11px 12px;border:1px solid #dbe6f5;border-radius:8px;background:#f8fbff;color:#09245a;font-weight:800}.timebox small{display:block;margin-top:4px;color:#66758b;font-weight:700}',
     '.msg{margin-top:12px;font-weight:700}.ok{color:#0f8a61}.bad{color:#c2410c}',
     '</style>',
     '</head>',
@@ -295,7 +326,8 @@ function attendancePage_(e) {
     '<main>',
     '<form id="attendanceForm">',
     '<h1>Absensi Civitas</h1>',
-    '<p>Markaz Dakwah Digital - Sesi ' + escapeHtml_(sesi) + '. Hari, tanggal, dan jam dicatat otomatis oleh sistem.</p>',
+    '<p>Markaz Dakwah Digital - Sesi ' + escapeHtml_(sesi) + '. Waktu lokal mengikuti zona waktu perangkat user, dan waktu server tetap disimpan untuk audit.</p>',
+    '<div class="timebox" id="localTimeBox">Memuat waktu lokal...<small>Zona waktu user</small></div>',
     '<label>Peran<select name="peran"><option>Santri</option><option>Super Admin</option><option>Direktur</option><option>Kepala Pendidikan</option><option>Guru</option><option>Ustadz Pembimbing</option><option>Tim Kesehatan</option><option>Bendahara</option></select></label>',
     '<label>Jenis Absen<select name="tipeAbsen"><option>Masuk</option><option>Keluar</option></select></label>',
     '<label>NIS / ID / Nomor HP<input name="nomorInduk" required autocomplete="off"></label>',
@@ -309,10 +341,13 @@ function attendancePage_(e) {
     '</form>',
     '</main>',
     '<script>',
-    'var form=document.getElementById("attendanceForm"),msg=document.getElementById("msg");',
+    'var form=document.getElementById("attendanceForm"),msg=document.getElementById("msg"),timeBox=document.getElementById("localTimeBox");',
+    'function collectLocalTime(){var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Jakarta",now=new Date();return{zonaWaktuUser:tz,hariLokal:new Intl.DateTimeFormat("id-ID",{weekday:"long",timeZone:tz}).format(now),tanggalLokal:new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit",timeZone:tz}).format(now),jamLokal:new Intl.DateTimeFormat("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false,timeZone:tz}).format(now).replace(/\\./g,":"),waktuLokalIso:now.toISOString()};}',
+    'function updateLocalTimeBox(){var t=collectLocalTime();timeBox.innerHTML=t.hariLokal+", "+t.tanggalLokal+" · "+t.jamLokal+"<small>Zona waktu user: "+t.zonaWaktuUser+"</small>";}',
+    'updateLocalTimeBox();setInterval(updateLocalTimeBox,1000);',
     'form.addEventListener("submit",function(evt){',
     'evt.preventDefault();msg.textContent="Mengirim absensi...";msg.className="msg";',
-    'var fd=new FormData(form);var data={};fd.forEach(function(value,key){data[key]=value;});',
+    'var fd=new FormData(form);var data={};fd.forEach(function(value,key){data[key]=value;});var localTime=collectLocalTime();Object.keys(localTime).forEach(function(key){data[key]=localTime[key];});',
     'data.sesi=' + JSON.stringify(sesi) + ';data.qrToken=' + JSON.stringify(token) + ';data.metode="QR";data.perangkat=navigator.userAgent;',
     'google.script.run.withSuccessHandler(function(json){msg.textContent=json.message||"Absensi diproses";msg.className="msg "+(json.ok?"ok":"bad");if(json.ok){form.reset();}}).withFailureHandler(function(err){msg.textContent=(err&&err.message)?err.message:"Gagal mengirim absensi. Coba lagi.";msg.className="msg bad";}).submitAttendanceFromPage(data);',
     '});',
@@ -322,6 +357,19 @@ function attendancePage_(e) {
   ].join('');
 
   return HtmlService.createHtmlOutput(html).setTitle('Absensi Civitas Markaz Dakwah Digital');
+}
+
+function currentServerTime_() {
+  var timezone = Session.getScriptTimeZone() || 'Asia/Jakarta';
+  var now = new Date();
+  return {
+    ok: true,
+    timezone: timezone,
+    hari: Utilities.formatDate(now, timezone, 'EEEE'),
+    tanggal: Utilities.formatDate(now, timezone, 'yyyy-MM-dd'),
+    jam: Utilities.formatDate(now, timezone, 'HH:mm:ss'),
+    iso: now.toISOString()
+  };
 }
 
 function readStudents_() {
@@ -352,6 +400,7 @@ function readStudents_() {
 
 function readAttendanceSummary_(parameter) {
   var timezone = Session.getScriptTimeZone() || 'Asia/Jakarta';
+  var userTimezone = parameter.timeZoneUser || '';
   var targetDate = parameter.date || Utilities.formatDate(new Date(), timezone, 'yyyy-MM-dd');
   var sheet = getSpreadsheet_().getSheetByName(SHEETS.ABSENSI);
   ensureHeaders_(sheet, [
@@ -359,6 +408,14 @@ function readAttendanceSummary_(parameter) {
     'Hari',
     'Tanggal',
     'Jam',
+    'Hari Server',
+    'Tanggal Server',
+    'Jam Server',
+    'Zona Waktu User',
+    'Hari Lokal',
+    'Tanggal Lokal',
+    'Jam Lokal',
+    'Waktu Lokal ISO',
     'Sesi',
     'Peran',
     'Nomor Induk',
@@ -383,6 +440,9 @@ function readAttendanceSummary_(parameter) {
   var headers = values.shift();
   var dateIdx = headers.indexOf('Tanggal');
   var timeIdx = headers.indexOf('Jam');
+  var localDateIdx = headers.indexOf('Tanggal Lokal');
+  var localTimeIdx = headers.indexOf('Jam Lokal');
+  var userTzIdx = headers.indexOf('Zona Waktu User');
   var roleIdx = headers.indexOf('Peran');
   var typeIdx = headers.indexOf('Tipe Absen');
   var statusIdx = headers.indexOf('Status Absensi');
@@ -396,7 +456,8 @@ function readAttendanceSummary_(parameter) {
 
   for (var i = 0; i < values.length; i += 1) {
     var row = values[i];
-    var rowDate = normalizeDateText_(row[dateIdx], timezone);
+    var localDate = localDateIdx >= 0 ? String(row[localDateIdx] || '') : '';
+    var rowDate = userTimezone && localDate ? localDate : normalizeDateText_(row[dateIdx], timezone);
     if (rowDate !== targetDate) {
       continue;
     }
@@ -409,6 +470,9 @@ function readAttendanceSummary_(parameter) {
       hari: String(row[headers.indexOf('Hari')] || ''),
       tanggal: rowDate,
       waktu: formatTimeText_(row[timeIdx], timezone),
+      tanggalLokal: localDate,
+      jamLokal: localTimeIdx >= 0 ? String(row[localTimeIdx] || '') : '',
+      zonaWaktuUser: userTzIdx >= 0 ? String(row[userTzIdx] || '') : '',
       nama: String(row[nameIdx] || '-'),
       identitas: String((idIdx >= 0 && row[idIdx]) || row[nisIdx] || '-'),
       peran: role,
@@ -431,6 +495,7 @@ function readAttendanceSummary_(parameter) {
     }
   }
 
+  summary.timeZoneUser = userTimezone;
   summary.updatedAt = Utilities.formatDate(new Date(), timezone, 'yyyy-MM-dd HH:mm:ss');
   return summary;
 }
