@@ -62,6 +62,10 @@ function doPost(e) {
       return jsonResponse(recordAttendance_(data));
     }
 
+    if (type === 'health.create') {
+      return jsonResponse(createHealthRecord_(data));
+    }
+
     return jsonResponse({
       ok: false,
       error: 'Tipe request tidak dikenal'
@@ -79,6 +83,7 @@ var SHEETS = {
   ORANG_TUA: 'OrangTuaWali',
   DOKUMEN: 'Dokumen',
   ABSENSI: 'Absensi',
+  KESEHATAN: 'Kesehatan',
   CONFIG: 'Config'
 };
 
@@ -106,6 +111,7 @@ function createStudent_(data) {
   ensureHeaders_(santriSheet, [
     'Timestamp',
     'Foto URL',
+    'Kode Santri MDD',
     'NIS',
     'Nama Lengkap',
     'Nama Panggilan',
@@ -134,6 +140,7 @@ function createStudent_(data) {
   appendByHeaders_(santriSheet, {
     'Timestamp': now,
     'Foto URL': data.fotoUrl || data.foto || '',
+    'Kode Santri MDD': data.kodeSantriMdd || '',
     'NIS': data.nis,
     'Nama Lengkap': data.namaLengkap,
     'Nama Panggilan': data.namaPanggilan || '',
@@ -159,8 +166,29 @@ function createStudent_(data) {
     'Bakat': data.bakat || ''
   });
 
-  appendByHeaders_(ss.getSheetByName(SHEETS.ORANG_TUA), {
+  var orangTuaSheet = ss.getSheetByName(SHEETS.ORANG_TUA);
+  ensureHeaders_(orangTuaSheet, [
+    'Timestamp',
+    'Kode Santri MDD',
+    'NIS',
+    'Nama Ayah',
+    'Nama Ibu',
+    'Pekerjaan Ayah',
+    'Tempat Lahir Ayah',
+    'Tanggal Lahir Ayah',
+    'Pekerjaan Ibu',
+    'Tempat Lahir Ibu',
+    'Tanggal Lahir Ibu',
+    'Jumlah Saudara',
+    'Anak Ke',
+    'No HP/WA Ayah',
+    'No HP/WA Ibu',
+    'Alamat Orangtua'
+  ]);
+
+  appendByHeaders_(orangTuaSheet, {
     'Timestamp': now,
+    'Kode Santri MDD': data.kodeSantriMdd || '',
     'NIS': data.nis,
     'Nama Ayah': data.namaAyah || '',
     'Nama Ibu': data.namaIbu || '',
@@ -177,8 +205,21 @@ function createStudent_(data) {
     'Alamat Orangtua': data.alamatOrangtua || ''
   });
 
-  appendByHeaders_(ss.getSheetByName(SHEETS.DOKUMEN), {
+  var dokumenSheet = ss.getSheetByName(SHEETS.DOKUMEN);
+  ensureHeaders_(dokumenSheet, [
+    'Timestamp',
+    'Kode Santri MDD',
+    'NIS',
+    'Nama Lengkap',
+    'File Foto',
+    'Kartu Keluarga',
+    'Akta Kelahiran',
+    'Folder Drive'
+  ]);
+
+  appendByHeaders_(dokumenSheet, {
     'Timestamp': now,
+    'Kode Santri MDD': data.kodeSantriMdd || '',
     'NIS': data.nis,
     'Nama Lengkap': data.namaLengkap,
     'File Foto': data.fotoFileName || '',
@@ -191,6 +232,59 @@ function createStudent_(data) {
     ok: true,
     message: 'Data santri berhasil disimpan ke Google Workspace.',
     nis: data.nis
+  };
+}
+
+function createHealthRecord_(data) {
+  if (!data.namaSantri || !data.kodeSantriMdd) {
+    throw new Error('Nama Santri dan Kode Santri MDD wajib diisi.');
+  }
+
+  var ss = getSpreadsheet_();
+  var sheet = ss.getSheetByName(SHEETS.KESEHATAN) || ss.insertSheet(SHEETS.KESEHATAN);
+  var now = new Date();
+
+  ensureHeaders_(sheet, [
+    'Timestamp',
+    'Nama Santri',
+    'Kode Santri MDD',
+    'Usia',
+    'Berat Badan Santri',
+    'Tinggi Badan',
+    'BMI',
+    'Tekanan Darah',
+    'Gula Darah',
+    'Kolesterol',
+    'Asam Urat',
+    'Riwayat Kesehatan',
+    'Obat Yang Rutin Diminum',
+    'Catatan Kesehatan',
+    'Petugas'
+  ]);
+
+  appendByHeaders_(sheet, {
+    'Timestamp': now,
+    'Nama Santri': data.namaSantri || '',
+    'Kode Santri MDD': data.kodeSantriMdd || '',
+    'Usia': data.usia || '',
+    'Berat Badan Santri': data.beratBadan || '',
+    'Tinggi Badan': data.tinggiBadan || '',
+    'BMI': data.bmi || '',
+    'Tekanan Darah': data.tekananDarah || '',
+    'Gula Darah': data.gulaDarah || '',
+    'Kolesterol': data.kolesterol || '',
+    'Asam Urat': data.asamUrat || '',
+    'Riwayat Kesehatan': data.riwayatKesehatan || '',
+    'Obat Yang Rutin Diminum': data.obatRutin || '',
+    'Catatan Kesehatan': data.catatanKesehatan || '',
+    'Petugas': data.petugas || 'Tim Kesehatan MDD'
+  });
+
+  return {
+    ok: true,
+    message: 'Data kesehatan berhasil tercatat.',
+    kodeSantriMdd: data.kodeSantriMdd,
+    namaSantri: data.namaSantri
   };
 }
 
