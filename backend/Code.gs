@@ -93,8 +93,36 @@ function createStudent_(data) {
 
   var ss = getSpreadsheet_();
   var now = new Date();
+  var santriSheet = ss.getSheetByName(SHEETS.SANTRI);
+  ensureHeaders_(santriSheet, [
+    'Timestamp',
+    'Foto URL',
+    'NIS',
+    'Nama Lengkap',
+    'Nama Panggilan',
+    'Tempat Lahir',
+    'Tanggal Lahir',
+    'Jenis Kelamin',
+    'Alamat',
+    'Nomor HP Santri',
+    'Email Aktif',
+    'Golongan Darah',
+    'Riwayat Penyakit',
+    'Alergi',
+    'Status',
+    'Tanggal Masuk',
+    'Program Pendidikan',
+    'Kelas',
+    'Wali Kelas',
+    'Ustadz Pembimbing',
+    'Jumlah Saudara',
+    'Anak Ke',
+    'Hobi',
+    'Cita-cita',
+    'Bakat'
+  ]);
 
-  appendByHeaders_(ss.getSheetByName(SHEETS.SANTRI), {
+  appendByHeaders_(santriSheet, {
     'Timestamp': now,
     'Foto URL': data.fotoUrl || data.foto || '',
     'NIS': data.nis,
@@ -114,7 +142,12 @@ function createStudent_(data) {
     'Program Pendidikan': data.programPendidikan || '',
     'Kelas': data.kelas || '',
     'Wali Kelas': data.waliKelas || '',
-    'Ustadz Pembimbing': data.ustadzPembimbing || ''
+    'Ustadz Pembimbing': data.ustadzPembimbing || '',
+    'Jumlah Saudara': data.jumlahSaudara || '',
+    'Anak Ke': data.anakKe || '',
+    'Hobi': data.hobi || '',
+    'Cita-cita': data.citaCita || '',
+    'Bakat': data.bakat || ''
   });
 
   appendByHeaders_(ss.getSheetByName(SHEETS.ORANG_TUA), {

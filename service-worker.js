@@ -1,4 +1,4 @@
-const CACHE_NAME = 'markaz-dakwah-digital-github-pages-v2';
+const CACHE_NAME = 'markaz-dakwah-digital-github-pages-v3';
 const SHELL_ASSETS = [
   './',
   './index.html',
