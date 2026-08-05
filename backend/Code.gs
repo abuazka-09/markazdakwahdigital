@@ -67,6 +67,10 @@ function doPost(e) {
       return jsonResponse(updateStudent_(data));
     }
 
+    if (type === 'student.delete') {
+      return jsonResponse(deleteStudent_(data));
+    }
+
     if (type === 'attendance.scan') {
       return jsonResponse(recordAttendance_(data));
     }
@@ -242,6 +246,54 @@ function createStudent_(data) {
     message: 'Data santri berhasil disimpan ke Google Workspace.',
     nis: data.nis
   };
+}
+
+function deleteStudent_(data) {
+  var code = normalizeCode_(data.kodeSantriMdd || data.originalStudentKey || data.nis);
+  if (!code) {
+    throw new Error('Kode Santri MDD atau NIS wajib diisi untuk menghapus data.');
+  }
+
+  var ss = getSpreadsheet_();
+  var deleted = 0;
+  deleted += deleteRowsByStudentCode_(ss.getSheetByName(SHEETS.SANTRI), code);
+  deleted += deleteRowsByStudentCode_(ss.getSheetByName(SHEETS.ORANG_TUA), code);
+  deleted += deleteRowsByStudentCode_(ss.getSheetByName(SHEETS.DOKUMEN), code);
+  deleted += deleteRowsByStudentCode_(ss.getSheetByName(SHEETS.KESEHATAN), code);
+
+  return {
+    ok: true,
+    message: 'Database santri berhasil dihapus.',
+    deletedRows: deleted,
+    kodeSantriMdd: data.kodeSantriMdd || '',
+    nis: data.nis || ''
+  };
+}
+
+function deleteRowsByStudentCode_(sheet, code) {
+  if (!sheet) {
+    return 0;
+  }
+
+  var values = sheet.getDataRange().getValues();
+  if (values.length <= 1) {
+    return 0;
+  }
+
+  var headers = values[0];
+  var codeIdx = headers.indexOf('Kode Santri MDD');
+  var nisIdx = headers.indexOf('NIS');
+  var deleted = 0;
+
+  for (var r = values.length - 1; r >= 1; r -= 1) {
+    var row = values[r];
+    if ((codeIdx >= 0 && normalizeCode_(row[codeIdx]) === code) || (nisIdx >= 0 && normalizeCode_(row[nisIdx]) === code)) {
+      sheet.deleteRow(r + 1);
+      deleted += 1;
+    }
+  }
+
+  return deleted;
 }
 
 function updateStudent_(data) {
