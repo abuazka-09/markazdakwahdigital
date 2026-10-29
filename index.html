@@ -332,7 +332,7 @@ body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--
           <button class="iconbtn" id="themeBtn" title="Dark/Light Mode"><span class="themeIcon"></span></button>
           <button class="iconbtn" id="notifBtn" title="Notifikasi"><span class="bellIcon"></span></button>
         </div>
-      <button class="chairman" id="chairmanButton" title="Atur profil Ketua Yayasan"><img id="chairmanPhoto" src="apps/web/public/chairman-placeholder.svg" alt="Foto profil Ketua Yayasan"><span><b id="chairmanName">Nama belum diisi</b><small>Ketua Yayasan</small></span></button></header>
+      <button class="chairman" id="chairmanButton" title="Atur profil Ketua Yayasan"><img id="chairmanPhoto" src="apps/web/public/chairman-placeholder.svg" alt="Foto profil Ketua Yayasan"><span><b id="chairmanName">Nama belum diisi</b><small>Ketua Yayasan</small><small id="profileSyncHeader" role="status">Memeriksa sinkronisasi…</small></span></button></header>
 
       <section class="section active" id="dashboard">
         <div class="hero">
@@ -362,7 +362,7 @@ body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--
   <div class="modal-backdrop" id="modalBackdrop"></div><div class="modal" id="modal"><h3 id="modalTitle">Modal</h3><div id="modalBody"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="ghost" id="modalClose">Tutup</button><button class="primary" id="modalOk">Simpan</button></div></div>
   <div class="toast" id="toast"></div>
 
-  <dialog class="profile-editor" id="chairmanEditor"><form method="dialog" id="chairmanForm"><h3>Profil Ketua Yayasan</h3><p class="label">Profil tersimpan pada browser perangkat ini.</p><label>Nama lengkap<input id="chairmanInput" maxlength="80" required placeholder="Nama Ketua Yayasan"></label><label>Foto profil (maksimal 2 MB)<input id="chairmanUpload" type="file" accept="image/png,image/jpeg,image/webp"></label><p id="profileError" role="alert"></p><div class="actions"><button class="primary" type="submit">Simpan Profil</button><button class="ghost" type="button" id="closeProfile">Tutup</button></div></form></dialog><script>
+  <dialog class="profile-editor" id="chairmanEditor"><form method="dialog" id="chairmanForm"><h3>Profil Ketua Yayasan</h3><p class="label">Profil disimpan bersama agar tampil sama di tablet, laptop, dan ponsel.</p><label>Nama lengkap<input id="chairmanInput" maxlength="80" required placeholder="Nama Ketua Yayasan"></label><label>Foto profil (maksimal 2 MB)<input id="chairmanUpload" type="file" accept="image/png,image/jpeg,image/webp"></label><label>Kata sandi akun Anda<input id="chairmanPassword" type="password" autocomplete="current-password" required></label><p id="profileSyncStatus" class="label" role="status" aria-live="polite">Memeriksa sinkronisasi…</p><p id="profileError" role="alert"></p><button class="ghost" id="useServerProfile" type="button">Gunakan Profil dari Server</button><div class="actions"><button class="primary" type="submit">Simpan Profil</button><button class="ghost" type="button" id="closeProfile">Tutup</button></div></form></dialog><script>
     const kpis=[['Jumlah Santri',1248,'+8,4%'],['Jumlah Guru',86,'+4'],['Jumlah Ustadz',42,'+3'],['Total Donasi','Rp 1,82 M','83% target'],['Kehadiran','96%','Realtime'],['Target Hafalan','78%','Naik'],['Jumlah Kelas',54,'Aktif'],['Donatur',7430,'+17%']];
     const studentSeed=[
       {kodeSantriMdd:'KSMDD-0001',nis:'MD-2026-0001',namaLengkap:'Ahmad Zaidan',namaPanggilan:'Zaidan',kelas:'VIII Tahfidz A',programPendidikan:'Tahfidz',status:'Aktif',jenisKelamin:'Laki-laki',tanggalMasuk:'2026-07-15',waliKelas:'Ust. Fikri',ustadzPembimbing:'Ust. Mahmud',namaAyah:'Bapak Hasan',namaIbu:'Ibu Aisyah',hpAyah:'081234567001',hpIbu:'081234567002'},
@@ -728,12 +728,6 @@ body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--
     document.getElementById('modalClose').onclick=closeModal;document.getElementById('modalBackdrop').onclick=closeModal;document.getElementById('modalOk').onclick=()=>{closeModal();showToast('Aksi berhasil diproses')};
     document.getElementById('globalSearch').oninput=e=>{const q=e.target.value.toLowerCase();if(!q)return;const found=students.filter(s=>Object.values(s).join(' ').toLowerCase().includes(q));if(found.length){setPage('santri');showToast(found.length+' data cocok ditemukan')}else showToast('Belum ada data cocok untuk: '+e.target.value)};
     document.querySelectorAll('.panel h3').forEach((el,i)=>{el.insertAdjacentHTML('afterbegin','<span class="heading-icon">'+visualIcons[i%visualIcons.length]+'</span>')});
-    let chairman={};try{chairman=JSON.parse(localStorage.getItem('mdd_chairman_profile')||'{}')}catch(e){}
-    function displayChairman(){document.getElementById('chairmanName').textContent=chairman.name||'Nama belum diisi';document.getElementById('chairmanPhoto').src=chairman.photo||'apps/web/public/chairman-placeholder.svg'}
-    displayChairman();
-    document.getElementById('chairmanButton').onclick=()=>{document.getElementById('chairmanInput').value=chairman.name||'';document.getElementById('chairmanEditor').showModal()};
-    document.getElementById('closeProfile').onclick=()=>document.getElementById('chairmanEditor').close();
-    document.getElementById('chairmanForm').onsubmit=async e=>{e.preventDefault();const file=document.getElementById('chairmanUpload').files[0];try{if(file&&(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024))throw Error('Pilih foto PNG, JPG, atau WebP maksimal 2 MB.');let photo=chairman.photo;if(file)photo=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});const next={name:document.getElementById('chairmanInput').value.trim(),photo};localStorage.setItem('mdd_chairman_profile',JSON.stringify(next));chairman=next;displayChairman();document.getElementById('chairmanEditor').close()}catch(err){document.getElementById('profileError').textContent=err.message||'Profil belum dapat disimpan.'}};
     document.getElementById('app').dataset.theme=localStorage.getItem('mdd_visual_theme')||'light';
     document.getElementById('themeBtn').addEventListener('click',()=>localStorage.setItem('mdd_visual_theme',document.getElementById('app').dataset.theme));
     renderKpi();renderBars('barChart',charts.attendance);renderBars('academicChart',charts.academic);renderBars('healthChart',[70,72,76,80,79,84,87,89]);renderBars('financeChart',charts.finance);renderBars('biChart',[62,69,74,81,88,91,93,96]);renderCircles('circleReports');renderCircles('hafalanCircles',[['Al-Quran',78],['Hadits',64],['Kitab',71]]);renderCircles('donationCircles',[['Zakat',86],['Infaq',74],['Wakaf',83]]);renderCircles('biCircles',[['Prestasi',82],['Guru',91],['Donasi',88]]);renderFeed('hafalanFeed',['Ahmad Zaidan: Setor 2 halaman Surah Al-Kahfi','Fatimah Azzahra: Murajaah Juz 29 selesai']);renderFeed('healthFeed',['Kelas IX-B: Pemeriksaan BMI selesai','Tim Kesehatan: 3 santri perlu kontrol lanjutan']);renderTable();renderLists();initHealthForm();loadStudentsFromWorkspace();loadAttendanceSummary();startDashboardClock();setupRoleLogin();
@@ -741,5 +735,6 @@ body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--
       window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
     }
   </script>
+<script src="./profile-sync.js?v=1"></script>
 </body>
 </html>
