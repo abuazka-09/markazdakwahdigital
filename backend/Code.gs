@@ -2,6 +2,10 @@ function doGet(e) {
   e = e || { parameter: {} };
   var action = String((e.parameter && e.parameter.action) || '').toLowerCase();
 
+  if (action === 'foundationprofile' || action === 'foundationprofilestatus') {
+    return foundationProfileGet_(e.parameter || {});
+  }
+
   if (action === 'health') {
     return jsonResponse({
       ok: true,
@@ -58,6 +62,10 @@ function doPost(e) {
     var payload = JSON.parse(rawBody);
     var type = payload.type || '';
     var data = payload.data || {};
+
+    if (type === 'foundation.profile.update') {
+      return jsonResponse(saveFoundationProfile_(payload));
+    }
 
     if (type === 'student.create') {
       return jsonResponse(createStudent_(data));
