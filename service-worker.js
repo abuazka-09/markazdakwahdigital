@@ -1,8 +1,9 @@
-const CACHE_NAME = 'markaz-dakwah-digital-github-pages-glossy-v11';
+const CACHE_NAME = 'markaz-dakwah-digital-github-pages-profile-sync-v12';
 const SHELL_ASSETS = [
   './',
   './index.html',
   './preview.html',
+  './profile-sync.js?v=1',
   './manifest.webmanifest',
   './apps/web/public/chairman-placeholder.svg',
   './apps/web/public/logo-mdd.png',
@@ -34,6 +35,8 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  // Live backend responses must never be served from an offline cache.
+  if (new URL(event.request.url).origin !== self.location.origin) return;
 
   if (event.request.mode === 'navigate' || event.request.destination === 'document') {
     event.respondWith(
