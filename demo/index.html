@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo MDD Smart Dashboard | Presentasi</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;unsafe-inline&#39;; style-src &#39;unsafe-inline&#39;; img-src &#39;self&#39; data:; connect-src &#39;none&#39;; form-action &#39;none&#39;; base-uri &#39;none&#39;; object-src &#39;none&#39;; worker-src &#39;none&#39;">
+  <meta name="theme-color" content="#09245a" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./../apps/web/public/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./../apps/web/public/favicon-16.png" />
+  <link rel="apple-touch-icon" href="./../apps/web/public/apple-touch-icon.png" />
+  <style>
+    :root {
+      --blue-950: #06152f;
+      --blue-900: #09245a;
+      --blue-800: #0e3c8a;
+      --blue-700: #1454b8;
+      --blue-500: #2478e6;
+      --blue-100: #eaf3ff;
+      --gold-600: #c99526;
+      --gold-500: #e0b34e;
+      --gold-100: #fff5d8;
+      --white: #ffffff;
+      --ink: #142033;
+      --muted: #66758b;
+      --line: #dbe6f5;
+      --bg: #f5f8fd;
+      --card: rgba(255,255,255,.92);
+      --danger: #c2410c;
+      --success: #0f8a61;
+      --shadow: 0 22px 60px rgba(9,36,90,.12);
+      --radius: 10px;
+    }
+    [data-theme="dark"] {
+      --bg: #061126;
+      --card: rgba(9, 25, 55, .92);
+      --ink: #eef5ff;
+      --muted: #aab9cf;
+      --line: rgba(223,233,247,.16);
+      --blue-100: rgba(36,120,230,.16);
+      --gold-100: rgba(224,179,78,.16);
+      --shadow: 0 22px 60px rgba(0,0,0,.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(36,120,230,.16), transparent 30%),
+        radial-gradient(circle at 85% 10%, rgba(224,179,78,.18), transparent 26%),
+        var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { display: grid; grid-template-columns: 286px minmax(0,1fr); min-height: 100vh; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow: auto;
+      background: linear-gradient(180deg, var(--blue-950), var(--blue-900));
+      color: white; padding: 22px 18px; border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .brand { display: flex; gap: 13px; align-items: center; padding: 4px 4px 18px; border-bottom: 1px solid rgba(255,255,255,.12); }
+    .brand img { width: 66px; height: 66px; object-fit: contain; filter: drop-shadow(0 10px 18px rgba(0,0,0,.28)); }
+    .brand strong { display:block; line-height:1.05; font-size: 15px; }
+    .brand span { display:block; margin-top:4px; color: #d8e8ff; font-size: 12px; }
+    .nav { margin-top: 18px; display: grid; gap: 7px; }
+    .nav button {
+      width: 100%; height: 42px; display:flex; align-items:center; gap:10px;
+      border: 1px solid transparent; border-radius: 8px; background: transparent; color: #dceaff;
+      padding: 0 12px; text-align: left; font-weight: 700; font-size: 14px;
+    }
+    .nav button:hover, .nav button.active { background: rgba(255,255,255,.12); border-color: rgba(224,179,78,.42); color: white; }
+    .nav i { width: 22px; text-align: center; color: var(--gold-500); font-style: normal; }
+    .content { min-width:0; padding: 18px 22px 28px; }
+    .topbar {
+      position: sticky; top:0; z-index: 5; margin: -18px -22px 18px; padding: 14px 22px;
+      background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    .mobile-menu { display:none; }
+    .title { display:flex; align-items:center; gap:12px; min-width: 260px; flex:1; }
+    .title img { width: 52px; height:52px; object-fit: contain; }
+    h1 { margin:0; font-size: 24px; line-height:1.1; color: var(--ink); }
+    .subtitle { margin:4px 0 0; color: var(--muted); font-size: 13px; }
+    .actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .select, .search input, textarea.select {
+      height: 40px; border-radius: 8px; border:1px solid var(--line); background: var(--card); color: var(--ink); padding: 0 12px;
+    }
+    textarea.select { height:auto; min-height:82px; padding:10px 12px; resize:vertical; }
+    .search { position:relative; }
+    .search input { width: 260px; padding-left: 36px; }
+    .search span { position:absolute; left:12px; top:10px; color: var(--muted); }
+    .iconbtn, .primary, .ghost {
+      height: 40px; border-radius: 8px; border:1px solid var(--line); background: var(--card); color: var(--ink); padding: 0 12px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:700;
+    }
+    .iconbtn { width:40px; padding:0; }
+    .primary { background: linear-gradient(135deg, var(--blue-700), var(--blue-900)); color:white; border-color: transparent; }
+    .gold { background: linear-gradient(135deg, var(--gold-500), var(--gold-600)); color: #111827; border-color: transparent; }
+    .ghost:hover, .iconbtn:hover { border-color: var(--blue-500); }
+    .hero {
+      position: relative; overflow:hidden; border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow);
+      background: linear-gradient(135deg, var(--blue-950), var(--blue-800) 58%, #ffffff 58.1%, #ffffff 100%);
+      color:white; min-height: 220px; display:grid; grid-template-columns: 1fr 360px; gap: 18px;
+    }
+    [data-theme="dark"] .hero { background: linear-gradient(135deg, var(--blue-950), var(--blue-800)); }
+    .hero:before, .hero:after { content:""; position:absolute; border-radius:50%; border:1px solid rgba(224,179,78,.45); }
+    .hero:before { width:180px; height:180px; right:260px; top:-70px; }
+    .hero:after { width:260px; height:260px; right:-70px; bottom:-120px; }
+    .hero h2 { margin: 8px 0 10px; max-width: 720px; font-size: 34px; line-height:1.08; color:white; }
+    .hero p { margin:0; color:#d9e8ff; line-height:1.65; }
+    .time-panel { position:relative; z-index:1; margin-top:16px; width:min(440px,100%); display:grid; gap:5px; border:1px solid rgba(255,255,255,.22); border-radius:10px; background:rgba(255,255,255,.12); padding:13px; }
+    .time-panel span { color:#d9e8ff; font-size:13px; font-weight:800; }
+    .time-panel strong { color:white; font-size:28px; letter-spacing:0; line-height:1; }
+    .time-panel small { color:#b9cff0; line-height:1.4; }
+    .hero-logo { position:relative; z-index:1; align-self:center; justify-self:center; width:270px; height:170px; object-fit:contain; filter: drop-shadow(0 18px 25px rgba(0,0,0,.32)); }
+    .badge { display:inline-flex; align-items:center; gap:8px; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:7px 11px; color:white; font-weight:800; font-size:13px; }
+    .grid-kpi { display:grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; margin-top: 16px; }
+    .card, .panel {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .card { padding: 16px; position:relative; overflow:hidden; }
+    .card:after { content:""; position:absolute; width:64px; height:64px; right:-16px; top:-18px; border-radius:50%; background: var(--blue-100); }
+    .card.goldish:after { background: var(--gold-100); }
+    .label { margin:0; color: var(--muted); font-size: 13px; }
+    .value { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-top: 12px; font-size: 26px; font-weight: 900; }
+    .delta { border-radius: 999px; padding: 5px 8px; font-size: 12px; font-weight: 800; background: var(--gold-100); color: var(--gold-600); white-space: nowrap; }
+    .layout { display:grid; grid-template-columns: minmax(0,1.1fr) minmax(340px,.9fr); gap: 14px; margin-top:14px; }
+    .panel { padding: 17px; min-width:0; }
+    .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .panel h3 { margin:0; font-size: 17px; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .tabs button { height:32px; border-radius: 8px; border:1px solid var(--line); background: var(--card); color: var(--muted); padding:0 10px; font-weight:700; }
+    .tabs button.active { background: var(--blue-700); color:white; border-color: transparent; }
+    .chart { min-height: 280px; display:grid; align-items:end; gap:10px; grid-template-columns: repeat(8,1fr); padding: 16px 4px 4px; }
+    .bar { min-height: 40px; border-radius: 9px 9px 4px 4px; background: linear-gradient(180deg, var(--blue-500), var(--blue-900)); position:relative; display:flex; align-items:flex-end; justify-content:center; color:white; font-size:11px; font-weight:800; padding-bottom:7px; }
+    .bar:nth-child(even) { background: linear-gradient(180deg, var(--gold-500), var(--gold-600)); color:#111827; }
+    .bar:before { content: attr(data-label); position:absolute; bottom:-22px; color:var(--muted); font-weight:700; }
+    .circles { display:grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .circle-card { text-align:center; padding: 14px; border:1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--card) 88%, var(--blue-100)); }
+    .donut { --p: 80; width:116px; height:116px; border-radius:50%; margin: 0 auto 10px; background: conic-gradient(var(--gold-500) calc(var(--p)*1%), var(--blue-100) 0); display:grid; place-items:center; position:relative; }
+    .donut:after { content:""; width:76px; height:76px; border-radius:50%; background: var(--card); position:absolute; }
+    .donut strong { position:relative; z-index:1; font-size: 20px; }
+    .flow { display:grid; grid-template-columns: repeat(5,1fr); align-items:center; gap:10px; margin-top: 10px; }
+    .node { min-height:82px; border-radius: 10px; border:1px solid var(--line); background: linear-gradient(180deg, var(--card), color-mix(in srgb, var(--blue-100) 65%, var(--card))); display:grid; place-items:center; text-align:center; padding:10px; font-weight:800; }
+    .arrow { height:2px; background: linear-gradient(90deg, var(--blue-500), var(--gold-500)); position:relative; }
+    .arrow:after { content:""; position:absolute; right:0; top:-4px; border-left:8px solid var(--gold-500); border-top:5px solid transparent; border-bottom:5px solid transparent; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th { text-align:left; color:var(--muted); font-weight:800; padding:10px 8px; border-bottom:1px solid var(--line); }
+    td { padding:12px 8px; border-bottom:1px solid var(--line); }
+    .status { border-radius:999px; padding:5px 8px; font-size:12px; font-weight:800; display:inline-flex; }
+    .ok { background: #dcfce7; color:#166534; } .warn { background: var(--gold-100); color:#8a5d00; } .bad { background:#ffedd5; color:var(--danger); }
+    [data-theme="dark"] .ok { background: rgba(22,101,52,.32); color:#8ff0b3; }
+    .section { display:none; }
+    .section.active { display:block; animation: fade .18s ease-out; }
+    @keyframes fade { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+    .toast, .modal, .notif {
+      position: fixed; z-index: 20; background: var(--card); color:var(--ink); border:1px solid var(--line); box-shadow: var(--shadow); border-radius:10px;
+    }
+    .toast { right:20px; bottom:20px; padding:13px 15px; display:none; max-width: 360px; }
+    .toast.show { display:block; }
+    .login-screen { position:fixed; inset:0; z-index:60; display:grid; place-items:center; padding:18px; background:linear-gradient(135deg,var(--blue-950),var(--blue-900)); color:white; }
+    .login-card { width:min(460px,100%); background:rgba(255,255,255,.96); color:var(--ink); border:1px solid rgba(224,179,78,.35); border-radius:10px; box-shadow:0 28px 80px rgba(0,0,0,.32); padding:22px; }
+    .login-card img { width:86px; height:86px; object-fit:contain; display:block; margin:0 auto 12px; }
+    .login-card h2 { margin:0; text-align:center; color:var(--blue-900); }
+    .login-card p { margin:8px 0 16px; text-align:center; color:var(--muted); line-height:1.5; }
+    .login-fields { display:grid; gap:12px; }
+    .login-fields label { display:grid; gap:6px; color:var(--muted); font-size:12px; font-weight:800; }
+    .login-fields input, .login-fields select { width:100%; }
+    .role-pill { display:inline-flex; align-items:center; gap:8px; min-height:40px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); padding:0 12px; font-weight:800; }
+    .app.locked { filter:blur(2px); pointer-events:none; user-select:none; }
+    .hidden { display:none !important; }
+    .notif { top:72px; right:22px; width:320px; padding:14px; display:none; }
+    .notif.show { display:block; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.42); display:none; z-index: 18; }
+    .modal-backdrop.show { display:block; }
+    .modal { left:50%; top:50%; transform: translate(-50%,-50%); width:min(900px,calc(100vw - 28px)); max-height: calc(100vh - 28px); overflow:auto; padding:18px; display:none; }
+    .modal.show { display:block; }
+    .modal h3 { margin-top:0; }
+    .student-tools { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .student-tools .label { max-width: 620px; line-height:1.5; }
+    .form-section { margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
+    .form-section h4 { margin:0 0 10px; font-size:14px; color:var(--blue-700); text-transform:uppercase; letter-spacing:.04em; }
+    [data-theme="dark"] .form-section h4 { color:#9ec7ff; }
+    .form-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:12px; }
+    .form-field { display:grid; gap:6px; min-width:0; }
+    .form-field.full { grid-column:1 / -1; }
+    .form-field label { color:var(--muted); font-size:12px; font-weight:800; }
+    .form-field input, .form-field select, .form-field textarea { width:100%; }
+    .upload-note { color:var(--muted); font-size:12px; line-height:1.4; }
+    .student-cell { display:flex; align-items:center; gap:10px; min-width:220px; }
+    .student-photo { width:42px; height:42px; border-radius:8px; object-fit:cover; background:var(--blue-100); border:1px solid var(--line); display:grid; place-items:center; color:var(--blue-700); font-weight:900; flex:0 0 42px; }
+    .student-meta small { display:block; color:var(--muted); margin-top:3px; }
+    .doc-pill { display:inline-flex; align-items:center; border-radius:999px; padding:4px 7px; background:var(--blue-100); color:var(--blue-800); font-size:12px; font-weight:800; }
+    .qr { margin:12px auto; width:220px; height:220px; display:block; object-fit:contain; border:12px solid white; background:white; box-shadow: 0 10px 28px rgba(9,36,90,.18); }
+    .qr-fallback { display:grid; place-items:center; text-align:center; padding:14px; color:var(--muted); border:1px dashed var(--line); border-radius:8px; }
+    .workspace-status { display:grid; gap:8px; margin-top:10px; }
+    .workspace-status div { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); }
+    .workspace-status b { color:var(--ink); }
+    .attendance-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:14px; margin-top:14px; }
+    .attendance-card { display:grid; gap:12px; }
+    .attendance-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .attendance-stat { border:1px solid var(--line); border-radius:8px; padding:10px; background:color-mix(in srgb,var(--card) 86%,var(--blue-100)); }
+    .attendance-stat b { display:block; font-size:22px; margin-top:4px; }
+    .attendance-list { display:grid; gap:8px; }
+    .attendance-row { display:flex; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line); padding:8px 0; }
+    .attendance-row:last-child { border-bottom:0; }
+    .attendance-row b, .attendance-row small { display:block; }
+    .attendance-row small { color:var(--muted); margin-top:2px; }
+    .empty { padding: 24px; color:var(--muted); text-align:center; }
+    .parent-page { display:grid; gap:16px; }
+    .parent-hero { position:relative; overflow:hidden; display:grid; grid-template-columns:120px 1fr; gap:18px; align-items:center; min-height:220px; padding:20px; border-radius:14px; color:white; background:linear-gradient(135deg,#0b2b72,#1464cf 52%,#f0b72f); box-shadow:0 20px 50px rgba(9,36,90,.22); }
+    .parent-hero:before { content:""; position:absolute; inset:auto -70px -110px auto; width:270px; height:270px; border-radius:50%; background:rgba(255,255,255,.15); }
+    .parent-photo { position:relative; z-index:1; width:112px; height:112px; border-radius:18px; object-fit:cover; display:grid; place-items:center; background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.38); font-size:32px; font-weight:900; }
+    .parent-hero h2 { position:relative; z-index:1; margin:8px 0; color:white; font-size:32px; line-height:1.08; }
+    .parent-hero p { position:relative; z-index:1; margin:0; color:#eaf3ff; line-height:1.55; }
+    .parent-metrics { position:relative; z-index:1; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:16px; }
+    .parent-metric { padding:10px; border-radius:10px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.22); }
+    .parent-metric span { display:block; color:#dbeafe; font-size:12px; font-weight:800; }
+    .parent-metric b { display:block; margin-top:4px; color:white; font-size:18px; }
+    .parent-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .parent-card { border:1px solid var(--line); border-radius:12px; padding:15px; background:linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 82%,var(--blue-100))); box-shadow:var(--shadow); min-width:0; }
+    .parent-card h4 { margin:0 0 10px; font-size:15px; color:var(--blue-900); }
+    .parent-card p { margin:0; color:var(--muted); line-height:1.55; }
+    .parent-progress { height:9px; border-radius:999px; overflow:hidden; background:var(--blue-100); margin:9px 0; }
+    .parent-progress i { display:block; height:100%; width:calc(var(--p)*1%); background:linear-gradient(90deg,var(--gold-500),var(--blue-600)); }
+    .parent-mini-bars { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:end; min-height:105px; margin-top:10px; }
+    .parent-mini-bars div { min-height:36px; border-radius:8px 8px 4px 4px; background:linear-gradient(180deg,#f0b72f,#1464cf); color:white; display:flex; align-items:flex-end; justify-content:center; padding:7px 3px; font-size:11px; font-weight:900; }
+    .parent-donuts { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .parent-donut { display:grid; place-items:center; gap:8px; text-align:center; }
+    .parent-donut i { --p:70; width:82px; height:82px; border-radius:50%; background:conic-gradient(var(--blue-600) calc(var(--p)*1%),var(--blue-100) 0); display:grid; place-items:center; color:var(--blue-900); font-weight:900; font-style:normal; position:relative; }
+    .parent-donut i:after { content:""; position:absolute; width:54px; height:54px; border-radius:50%; background:var(--card); }
+    .parent-donut b { position:relative; z-index:1; }
+    .parent-tags { display:flex; flex-wrap:wrap; gap:8px; }
+    .parent-tag { border-radius:999px; padding:7px 10px; background:color-mix(in srgb,var(--gold-100) 75%,white); color:#7a5200; font-weight:900; font-size:12px; }
+    .payment-good { color:#0f8a61; font-weight:900; }
+    .payment-warn { color:#c2410c; font-weight:900; }
+    .nav-ico { width:24px; height:24px; border-radius:8px; display:grid; place-items:center; flex:0 0 24px; background: rgba(224,179,78,.16); border:1px solid rgba(224,179,78,.42); color: var(--gold-500); font-size: 11px; font-weight: 900; line-height:1; }
+    .hamb { width:18px; display:grid; gap:4px; }
+    .hamb span { display:block; height:2px; border-radius:99px; background: currentColor; }
+    .searchIcon { width:15px; height:15px; border:2px solid var(--muted); border-radius:50%; display:inline-block; position:absolute; left:13px; top:11px; }
+    .searchIcon:after { content:""; width:7px; height:2px; background:var(--muted); position:absolute; right:-6px; bottom:-3px; transform:rotate(45deg); border-radius:99px; }
+    .themeIcon { width:18px; height:18px; border-radius:50%; display:block; background:linear-gradient(90deg,var(--blue-900) 0 50%, var(--gold-500) 50% 100%); box-shadow:inset 0 0 0 2px rgba(255,255,255,.65); }
+    .bellIcon { width:16px; height:17px; border:2px solid currentColor; border-bottom:0; border-radius:10px 10px 4px 4px; display:block; position:relative; }
+    .bellIcon:before { content:""; position:absolute; left:3px; right:3px; bottom:-5px; height:2px; background:currentColor; border-radius:99px; }
+    .bellIcon:after { content:""; position:absolute; left:5px; bottom:-9px; width:4px; height:4px; background:currentColor; border-radius:50%; }
+    .pulseDot { width:9px; height:9px; border-radius:50%; display:inline-block; background:var(--gold-500); box-shadow:0 0 0 5px rgba(224,179,78,.18); }
+    .btnIcon { width:16px; height:16px; display:inline-block; position:relative; flex:0 0 16px; }
+    .refreshIcon { border:2px solid currentColor; border-right-color:transparent; border-radius:50%; }
+    .refreshIcon:after { content:""; position:absolute; right:-2px; top:0; border-left:5px solid currentColor; border-top:4px solid transparent; border-bottom:4px solid transparent; transform:rotate(18deg); }
+    .exportIcon:before { content:""; position:absolute; left:7px; top:1px; width:2px; height:10px; background:currentColor; }
+    .exportIcon:after { content:""; position:absolute; left:3px; top:7px; width:10px; height:10px; border-left:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(-45deg); }
+    .importIcon:before { content:""; position:absolute; left:7px; top:5px; width:2px; height:10px; background:currentColor; }
+    .importIcon:after { content:""; position:absolute; left:3px; top:0; width:10px; height:10px; border-left:2px solid currentColor; border-top:2px solid currentColor; transform:rotate(45deg); }
+    .qrIcon { display:grid; grid-template-columns:repeat(2,7px); grid-template-rows:repeat(2,7px); gap:2px; }
+    .qrIcon:before, .qrIcon:after { content:""; background:currentColor; border-radius:2px; box-shadow:9px 0 0 currentColor, 0 9px 0 currentColor; }
+    .drawer-backdrop { display:none; }
+    @media(max-width: 1120px){ .hero{grid-template-columns:1fr}.hero-logo{display:none}.grid-kpi{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.circles{grid-template-columns:1fr 1fr 1fr}.flow{grid-template-columns:1fr}.arrow{height:26px;width:2px;margin:auto}.arrow:after{right:-4px;top:18px;transform:rotate(90deg)} }
+    @media(max-width: 760px){ .app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:30;transform:translateX(-105%);transition:.2s;width:286px}.sidebar.open{transform:translateX(0)}.drawer-backdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:25}.mobile-menu{display:inline-flex}.content{padding:14px}.topbar{margin:-14px -14px 14px;padding:12px 14px}.title{min-width:0}.title img{width:44px;height:44px}h1{font-size:19px}.search input{width:100%}.search{width:100%}.actions{width:100%}.select{flex:1}.grid-kpi,.attendance-grid,.parent-grid,.parent-metrics{grid-template-columns:1fr}.circles{grid-template-columns:1fr}.hero h2,.parent-hero h2{font-size:27px}.hero{padding:18px}.parent-hero{grid-template-columns:1fr;padding:18px}.chart{grid-template-columns:repeat(4,1fr);row-gap:34px}.form-grid{grid-template-columns:1fr}.modal{width:calc(100vw - 18px);padding:14px} }
+  
+/* MDD glossy visual system — offline, theme aware */
+:root{--radius:18px;--blue-600:#0864df;--shadow:0 6px 16px #1658a51a, inset 0 1px 0 #ffffffb3}
+body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--bg)}
+.sidebar{background:radial-gradient(ellipse at 0 70%,#1063c5aa,transparent 50%),linear-gradient(150deg,#063b88,#031b48 65%,#06469b);border-right:3px solid #e6bb53;padding:24px 12px}
+.brand{flex-direction:column;text-align:center;padding-bottom:25px}.brand img{width:112px;height:100px}.brand strong{font-size:18px;letter-spacing:1px}.brand span{font-size:11px;letter-spacing:1px;color:#ffdc84}
+.nav{gap:9px}.nav button{height:56px;border:1px solid #448de56b;border-radius:15px;background:linear-gradient(115deg,#1558a752,#001b4b);box-shadow:inset 0 1px 1px #ffffff19,0 4px 7px #00122c55;transition:transform .18s}.nav button:hover{transform:translateX(3px)}
+.nav button.active{color:#062357;background:linear-gradient(150deg,#fff9c4,#ffdc68 40%,#d99a20 75%,#ffe599);border:2px solid #fff1aa;box-shadow:inset 0 2px 3px white,0 0 15px #ffca5b66}
+.nav .nav-ico{display:grid;place-items:center;width:34px;height:34px;border:1px solid #ffdf8b;border-radius:10px;background:linear-gradient(145deg,#fff4b2,#edb53f 55%,#a96b09);color:#06377b;box-shadow:inset 0 2px 2px #fff8d9,0 3px 4px #0005;flex-shrink:0}.nav-ico svg{width:23px;height:23px}
+.topbar{border-bottom:3px solid #e9bb50;border-radius:0 0 20px 20px;background:var(--card);box-shadow:0 5px 14px #12376513}.title h1{font-size:18px}.title .subtitle{font-size:11px;letter-spacing:1.1px}
+.hero,[data-theme="dark"] .hero{background:radial-gradient(ellipse at 75% 5%,#168dff99,transparent 55%),repeating-linear-gradient(130deg,transparent 0 70px,#ffffff04 70px 110px),linear-gradient(115deg,#05296c,#0659cb 75%,#002658);border:1px solid #559ded;border-bottom:3px solid #e5b44d;min-height:260px;padding:28px}.hero h2{font-size:30px;max-width:660px;line-height:1.18;text-shadow:0 3px 2px #001e58}.hero-logo{background:radial-gradient(circle,#ffffffed,#ffffff9c 55%,transparent 56%);width:250px;height:230px}.hero:before,.hero:after{box-shadow:inset 2px 3px 8px #fff6,0 0 18px #68c8ff66;border:2px solid #e7bf5c88}.hero>div{position:relative;z-index:1}.hero .ghost{background:#ffffff17;color:white;border-color:#ffffff6b}
+.time-panel{padding:10px 14px;max-width:390px;margin-top:12px;background:linear-gradient(130deg,#ffffff20,#ffffff08);box-shadow:inset 0 1px 1px #ffffff50}.time-panel strong{font-size:24px}
+.primary,.gold,button.gold,.tabs button.active{border:1px solid #9bd6ff;border-radius:11px;background:linear-gradient(165deg,#3aaaff,#0667ed 45%,#003b9f);box-shadow:inset 0 2px 2px #ffffff99,0 4px 8px #0057c83b}.gold,button.gold{border-color:#ffeaa1;background:linear-gradient(155deg,#fff5b5,#ffd05b 45%,#d99b22);color:#112c58}.ghost,.iconbtn,.select,.search input{border-radius:11px;box-shadow:inset 0 1px 2px #0b47900a,0 2px 5px #1255aa0a}
+.grid-kpi{gap:15px}.card{border:2px solid #99d5ff;background:linear-gradient(135deg,#2499f5,#0758c7 48%,#032c7d);box-shadow:inset 0 2px 3px #fff9,inset 0 -3px 7px #001d5a,0 4px 12px #006ae344;color:white;padding:18px;min-height:135px}.card .label{color:#eaf4ff;font-weight:700;padding-right:38px}.card .value{font-size:28px}.card .delta{color:#fff0be;background:#ffffff1c;border:1px solid #ffffff38;font-size:11px}.card:nth-child(3n){background:linear-gradient(135deg,#fff3ab,#edbd4d 50%,#c18b24);border-color:#fff0af;color:#082b64}.card:nth-child(3n) .label{color:#173662}.card:nth-child(3n) .delta{color:#173662;background:#fff6}.card:after{display:none}.kpi-icon{float:right;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#fffbd3,#e6ad32);color:#073d89;box-shadow:inset 0 2px 3px white,0 4px 5px #001d6555;border:1px solid #ffeca0}.kpi-icon svg{width:23px;height:23px}
+.panel{border:1px solid #d5e7fc;background:linear-gradient(155deg,var(--card),color-mix(in srgb,var(--card) 90%,#a5d4ff));border-radius:17px;padding:19px;box-shadow:inset 0 2px 2px #ffffff66,0 5px 12px #085bc814}.panel h3{color:var(--ink);line-height:1.4}.panel-head{padding-bottom:12px;border-bottom:1px solid var(--line)}.heading-icon{display:inline-grid;place-items:center;vertical-align:middle;width:34px;height:34px;margin-right:9px;border-radius:10px;border:1px solid #e2af42;background:linear-gradient(140deg,#fff7b2,#edb438);color:#073778;box-shadow:inset 0 2px 3px #fff,0 3px 5px #b17c252d}.heading-icon svg{width:21px;height:21px}
+.chart{background:repeating-linear-gradient(to top,transparent 0 47px,var(--line) 47px 48px);border-bottom:1px solid var(--line);gap:16px;margin-bottom:22px;padding:18px 12px 0}.bar{border:1px solid #67c8ff;background:linear-gradient(90deg,#003db0,#1686ff 45%,#0063df 75%,#003eaa);box-shadow:inset 0 3px 2px #b5edff,4px 3px 0 #052b6c20,0 5px 8px #00449922;border-radius:6px 6px 0 0}.bar:nth-child(even){background:linear-gradient(90deg,#c58a14,#ffdb6e 45%,#efb42d 75%,#b77b0d);border-color:#ffdc78;box-shadow:inset 0 3px 2px #fff1bb,4px 3px 0 #8c681c22}
+.circles{gap:10px}.circle-card{padding:18px 8px;border:0;background:transparent}.donut{width:112px;height:112px;background:conic-gradient(#087eff calc(var(--p)*.72%),#f2c352 0 calc(var(--p)*1%),var(--line) 0);box-shadow:inset 0 3px 4px #ffffffc9,inset -4px -6px 5px #001c5b55,0 8px 0 #073881,0 15px 15px #00316e2e;border:1px solid #8bd1ff;margin-bottom:24px}.donut:after{width:75px;height:75px;background:var(--card);box-shadow:0 -3px 4px #002d7b50,inset 0 2px 5px #003a6c19}.donut strong{font-size:21px}.node{border:1px solid #e2c274;box-shadow:inset 0 2px 2px #fff9,0 5px 8px #0c4e8e16}
+.chairman{margin-left:auto;display:flex;align-items:center;gap:10px;border:1px solid var(--line);padding:5px 12px 5px 6px;border-radius:30px;background:var(--card);color:var(--ink);text-align:left;min-width:180px}.chairman img{width:44px;height:44px;border-radius:50%;border:2px solid #e7b84b;object-fit:cover}.chairman b{display:block;font-size:13px}.chairman small{display:block;font-size:11px;color:var(--muted);margin-top:4px}.profile-editor{border-radius:16px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:min(440px,90vw);box-shadow:0 20px 80px #001a4c55;padding:24px}.profile-editor::backdrop{background:#00133388}.profile-editor label{display:grid;gap:8px;margin:18px 0}.profile-editor input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+[data-theme="dark"]{--line:#244775;--card:#0c2347;--bg:#04132b}[data-theme="dark"] .panel{border-color:#264e7f}[data-theme="dark"] .topbar{background:#0a2040}[data-theme="dark"] .circle-card{background:transparent}[data-theme="dark"] body{background:#04132b}
+@media(min-width:1400px){.app{grid-template-columns:260px minmax(0,1fr)}.grid-kpi{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:1120px){.chairman{margin-left:0}.hero{min-height:0}.hero-logo{display:none}.circles{grid-template-columns:repeat(3,minmax(0,1fr))}.donut{width:95px;height:95px}.donut:after{width:64px;height:64px}}
+@media(max-width:760px){.topbar{gap:10px}.title h1{font-size:15px}.title{flex:1}.chairman{margin-left:auto;min-width:0}.chairman b{max-width:140px;overflow:hidden;text-overflow:ellipsis}.hero h2{font-size:25px}.grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:13px}.card .value{font-size:21px;display:grid;gap:8px}.card .label{font-size:12px;padding:0;clear:both}.kpi-icon{margin-bottom:10px}.circles{grid-template-columns:repeat(3,minmax(0,1fr))}.donut{width:77px;height:77px}.donut:after{width:51px;height:51px}.donut strong{font-size:15px}.circle-card{padding:12px 0;font-size:12px}.circle-card .label{font-size:10px}.chart{gap:12px}.panel-head{flex-wrap:wrap}.hero{padding:20px}.actions .search{order:3}.sidebar{width:280px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+
+.demo-note{border:1px solid #e4bd58;background:var(--gold-100);padding:12px 16px;border-radius:12px;color:var(--ink);font-size:13px;line-height:1.5}
+button:disabled,input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;opacity:.65}input:disabled,select:disabled,textarea:disabled{color:var(--ink);background:var(--blue-100)}
+.chairman{cursor:default}.modal{max-height:85vh;overflow:auto}
+@media(min-width:761px){.mobile-menu{display:none!important}}
+@media(max-width:760px){.nav button{min-height:54px}.chairman{margin-left:0}.sidebar{padding-bottom:35px}.topbar{position:relative}.title h1{font-size:14px}}
+</style>
+</head>
+<body>
+  
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <div class="app" id="app" data-theme="light">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><img src="../apps/web/public/logo-mdd.png" alt="Logo MDD"><div><strong>MARKAZ DAKWAH</strong><span>DIGITAL SMART DASHBOARD</span></div></div>
+      <nav class="nav" id="nav">
+        <button class="active" data-page="dashboard"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7v11h-6v-7H9v7H3Z"/></svg></span> Dashboard Utama</button>
+        <button data-page="santri"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M18 8h4 M20 6v4"/></svg></span> Database Santri</button>
+        <button data-page="akademik"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h7l2 2 2-2h7v16h-7l-2 2-2-2H3Z M12 6v16"/></svg></span> Akademik</button>
+        <button data-page="hafalan"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h16v18H4Z M8 7h8 M8 11h8 M8 15h5"/></svg></span> Hafalan</button>
+        <button data-page="kesehatan"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z"/></svg></span> Kesehatan</button>
+        <button data-page="keuangan"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v15H3Z M3 10h18 M16 15h3 M5 3h13"/></svg></span> Keuangan</button>
+        <button data-page="donasi"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l4 4h6a2 2 0 0 1 0 4H9l-6-4 M12 7c-5-5 2-8 3-3 2-5 8-2 3 3l-3 3Z"/></svg></span> ZISWAF & Donasi</button>
+        <button data-page="orangtua"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21v-3a5 5 0 0 1 10 0v3 M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M16 11a3 3 0 1 0 0-6 M16 15h2a4 4 0 0 1 4 4v2"/></svg></span> Orang Tua</button>
+        <button data-page="bi"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10h4v10 M10 20V4h4v16 M16 20v-13h4v13"/></svg></span> BI Dashboard</button>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <button class="iconbtn mobile-menu" id="menuBtn" title="Buka menu"><span class="hamb"><span></span><span></span><span></span></span></button>
+        <div class="title"><img src="../apps/web/public/logo-mdd.png" alt="Logo MDD"><div><h1>MARKAZ DAKWAH DIGITAL</h1><p class="subtitle">Demo Presentasi · Hanya Lihat</p></div></div>
+        <div class="actions">
+          <label class="search"><span class="searchIcon"></span><input disabled aria-disabled="true" id="globalSearch" placeholder="Cari santri, guru, donatur, invoice..."></label>
+          <span class="role-pill">DEMO · HANYA LIHAT</span>
+          
+          <button class="iconbtn" id="themeBtn" title="Dark/Light Mode"><span class="themeIcon"></span></button>
+          <button class="iconbtn" id="notifBtn" title="Notifikasi"><span class="bellIcon"></span></button>
+        </div>
+      <div class="chairman"><img src="../apps/web/public/chairman-placeholder.svg" alt="Ilustrasi profil Ketua Yayasan"><span><b>Ketua Yayasan</b><small>Profil ilustrasi demo</small></span></div></header>
+
+      <section class="section active" id="dashboard">
+        <div class="hero">
+          <div><span class="badge"> Data Ilustrasi · Demo</span><h2>Lembaga Pendidikan Islam Modern Markaz Dakwah Digital</h2><p><strong>(Inspired by Revelation. Driven by Innovation)</strong><br>Berilmu &bull; Beradab &bull; Berdampak</p><div class="time-panel"><span id="dashboardDay">Memuat hari...</span><strong id="dashboardClock">--:--:--</strong><small id="dashboardDate">Zona waktu user</small></div><div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button disabled title="Tidak tersedia dalam demo hanya lihat" class="primary" data-action="refresh"><span class="btnIcon refreshIcon"></span> Refresh Data</button><button disabled title="Tidak tersedia dalam demo hanya lihat" class="gold" data-action="export"><span class="btnIcon exportIcon"></span> Export CSV</button><button disabled title="Tidak tersedia dalam demo hanya lihat" class="ghost" data-action="qr"><span class="btnIcon qrIcon"></span> QR Absensi</button></div></div>
+          <img class="hero-logo" src="../apps/web/public/logo-mdd.png" alt="Logo Markaz Dakwah Digital">
+        </div>
+        <p class="demo-note">Versi presentasi dengan data ilustrasi. Jelajahi seluruh menu; input dan perubahan data dinonaktifkan.</p><div class="grid-kpi" id="kpiGrid"></div>
+        <div class="attendance-grid">
+          <div class="panel attendance-card"><div class="panel-head"><h3>Absensi Harian Santri</h3><span class="doc-pill" id="santriAttendanceDate">Hari ini</span></div><div id="santriAttendance"></div></div>
+          <div class="panel attendance-card"><div class="panel-head"><h3>Absensi Harian Civitas</h3><span class="doc-pill" id="civitasAttendanceDate">Hari ini</span></div><div id="civitasAttendance"></div></div>
+        </div>
+        <div class="layout"><div class="panel"><div class="panel-head"><h3>Diagram Pertumbuhan Lembaga</h3><div class="tabs"><button class="active" data-chart="attendance">Kehadiran</button><button data-chart="academic">Akademik</button><button data-chart="finance">Keuangan</button></div></div><div class="chart" id="barChart"></div></div><div class="panel"><div class="panel-head"><h3>Circle Report</h3><button disabled title="Tidak tersedia dalam demo hanya lihat" class="ghost" data-action="refresh">Update</button></div><div class="circles" id="circleReports"></div></div></div>
+      </section>
+
+      <section class="section" id="santri"><div class="panel"><div class="panel-head"><h3>Database Santri</h3><button disabled title="Tidak tersedia dalam demo hanya lihat" class="primary" data-action="add">+ Tambah Santri</button></div><div class="student-tools"><p class="label">Profil santri, data orang tua/wali, dan dokumen pendukung dicatat sebagai satu database operasional terpusat.</p><span class="doc-pill" id="studentCount">0 Santri</span></div><div style="overflow:auto"><table id="studentTable"></table></div></div></section>
+      <section class="section" id="akademik"><div class="layout"><div class="panel"><h3>Nilai Akademik</h3><div class="chart" id="academicChart"></div></div><div class="panel"><h3>Mata Pelajaran Aktif</h3><div id="subjectList"></div></div></div></section>
+      <section class="section" id="hafalan"><div class="layout"><div class="panel"><h3>Progress Hafalan</h3><div class="circles" id="hafalanCircles"></div></div><div class="panel"><h3>Setoran Terbaru</h3><div id="hafalanFeed"></div></div></div></section>
+      <section class="section" id="kesehatan"><div class="layout"><div class="panel"><div class="panel-head"><h3>Form Input Kesehatan Santri</h3><span class="doc-pill">Tim Kesehatan MDD</span></div><form id="healthForm"><div class="form-grid" id="healthFormGrid"></div><p class="label" id="healthFormNote" style="margin-top:12px">Contoh form kesehatan. Seluruh kolom input dikunci pada versi demo.</p><button class="primary" type="button" disabled data-health-submit>Simpan Data Kesehatan</button></form></div><div class="panel"><h3>Grafik Kesehatan Santri</h3><div class="chart" id="healthChart"></div></div><div class="panel"><h3>Catatan Tim Kesehatan</h3><div id="healthFeed"></div></div></div></section>
+      <section class="section" id="keuangan"><div class="layout"><div class="panel"><h3>SPP dan Pembayaran</h3><div class="chart" id="financeChart"></div></div><div class="panel"><h3>Invoice Prioritas</h3><div id="invoiceList"></div></div></div></section>
+      <section class="section" id="donasi"><div class="layout"><div class="panel"><h3>Campaign ZISWAF & Donasi</h3><div class="circles" id="donationCircles"></div></div><div class="panel"><h3>Donatur Terbaru</h3><div id="donorList"></div></div></div></section>
+      <section class="section" id="orangtua"><div id="parentSummary"></div></section>
+      <section class="section" id="bi"><div class="panel"><div class="panel-head"><h3>Business Intelligence Dashboard</h3><button disabled title="Tidak tersedia dalam demo hanya lihat" class="gold" data-action="export">Export BI</button></div><div class="actions" style="margin-bottom:14px"><select class="select" disabled><option>Semua Tanggal</option><option>Bulan Ini</option></select><select class="select" disabled><option>Semua Program</option><option>Tahfidz</option></select><select class="select" disabled><option>Semua Kelas</option><option>VIII Tahfidz A</option></select><select class="select" disabled><option>Semua Gender</option><option>Laki-laki</option><option>Perempuan</option></select></div><div class="layout"><div><div class="chart" id="biChart"></div></div><div class="circles" id="biCircles"></div></div></div></section>
+    </main>
+  </div>
+
+  <div class="notif" id="notifPanel"><b>Notifikasi</b><div class="feed" style="margin-top:10px"><div><b>Pengumuman baru</b><small>Rapat wali santri Jumat 08.00</small></div><div><b>Pembayaran masuk</b><small>Donasi Wakaf Rp 12.500.000</small></div><div><b>Absensi</b><small>8 santri perlu konfirmasi izin</small></div></div></div>
+  <div class="modal-backdrop" id="modalBackdrop"></div><div class="modal" id="modal"><h3 id="modalTitle">Modal</h3><div id="modalBody"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="ghost" id="modalClose">Tutup</button></div></div>
+  <div class="toast" id="toast"></div>
+
+  
+<script>
+"use strict";
+const kpis=[['Jumlah Santri',1248,'+8,4%'],['Jumlah Guru',86,'+4'],['Jumlah Ustadz',42,'+3'],['Total Donasi','Rp 1,82 M','83% target'],['Kehadiran','96%','Realtime'],['Target Hafalan','78%','Naik'],['Jumlah Kelas',54,'Aktif'],['Donatur',7430,'+17%']];
+const studentSeed=[
+      {kodeSantriMdd:'KSMDD-0001',nis:'MD-2026-0001',namaLengkap:'Ahmad Zaidan',namaPanggilan:'Zaidan',kelas:'VIII Tahfidz A',programPendidikan:'Tahfidz',status:'Aktif',jenisKelamin:'Laki-laki',tanggalMasuk:'2026-07-15',waliKelas:'Ust. Fikri',ustadzPembimbing:'Ust. Mahmud',namaAyah:'Bapak Hasan',namaIbu:'Ibu Aisyah'},
+      {kodeSantriMdd:'KSMDD-0002',nis:'MD-2026-0002',namaLengkap:'Fatimah Azzahra',namaPanggilan:'Fatimah',kelas:'VII B',programPendidikan:'Bahasa Arab',status:'Aktif',jenisKelamin:'Perempuan',tanggalMasuk:'2026-07-15',waliKelas:'Usth. Salma',ustadzPembimbing:'Usth. Maryam',namaAyah:'Bapak Abdullah',namaIbu:'Ibu Khadijah'},
+      {kodeSantriMdd:'KSMDD-0003',nis:'MD-2026-0003',namaLengkap:'Hasan Al-Banna',namaPanggilan:'Hasan',kelas:'IX Coding',programPendidikan:'AI & Coding',status:'Aktif',jenisKelamin:'Laki-laki',tanggalMasuk:'2026-07-15',waliKelas:'Ust. Hilmi',ustadzPembimbing:'Ust. Ihsan',namaAyah:'Bapak Ridwan',namaIbu:'Ibu Safiyah'},
+      {kodeSantriMdd:'KSMDD-0004',nis:'MD-2026-0004',namaLengkap:'Maryam Shalihah',namaPanggilan:'Maryam',kelas:'VIII Tahsin',programPendidikan:'Tahsin',status:'Izin',jenisKelamin:'Perempuan',tanggalMasuk:'2026-07-15',waliKelas:'Usth. Nadia',ustadzPembimbing:'Usth. Laila',namaAyah:'Bapak Yusuf',namaIbu:'Ibu Aminah'}
+    ];
+const feeds=['Absensi pagi tersinkron: 1.126 santri hadir','Setoran hafalan baru: 312 halaman tercatat','Tagihan SPP diperbarui: 214 invoice terbit','Pemeriksaan kesehatan kelas IX-B selesai'];
+const healthFields=[
+      ['namaSantri','Nama Santri','text',true],
+      ['kodeSantriMdd','Kode Santri MDD','text',true],
+      ['usia','Usia','number',true],
+      ['beratBadan','Berat badan santri','number',true],
+      ['tinggiBadan','Tinggi badan','number',true],
+      ['bmi','BMI (Body Mass Index)','text',true],
+      ['tekananDarah','Tekanan darah','text',true],
+      ['gulaDarah','Gula darah','number',true],
+      ['kolesterol','Kolesterol','number',true],
+      ['asamUrat','Asam urat','number',true],
+      ['riwayatKesehatan','Riwayat kesehatan','textarea',true],
+      ['obatRutin','Obat Yang Rutin Diminum','textarea',true],
+      ['catatanKesehatan','Catatan kesehatan','textarea',true]
+    ];
+const charts={attendance:[76,82,88,91,86,94,96,92],academic:[70,75,82,85,88,86,91,93],finance:[58,62,74,79,83,89,92,96]};
+const labels=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu'];
+const circleData=[['Hafalan',78],['Akademik',88],['Kesehatan',82]];
+const visualIcons=[`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7v11h-6v-7H9v7H3Z"/></svg>`, `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M18 8h4 M20 6v4"/></svg>`, `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h7l2 2 2-2h7v16h-7l-2 2-2-2H3Z M12 6v16"/></svg>`, `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h16v18H4Z M8 7h8 M8 11h8 M8 15h5"/></svg>`, `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z"/></svg>`, `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v15H3Z M3 10h18 M16 15h3 M5 3h13"/></svg>`, `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l4 4h6a2 2 0 0 1 0 4H9l-6-4 M12 7c-5-5 2-8 3-3 2-5 8-2 3 3l-3 3Z"/></svg>`, `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21v-3a5 5 0 0 1 10 0v3 M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M16 11a3 3 0 1 0 0-6 M16 15h2a4 4 0 0 1 4 4v2"/></svg>`, `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10h4v10 M10 20V4h4v16 M16 20v-13h4v13"/></svg>`];
+const students=studentSeed;const healthRecords=[];
+function renderKpi(){document.getElementById('kpiGrid').innerHTML=kpis.map((k,i)=>`<article class="card ${i%3===0?'goldish':''}"><span class="kpi-icon">${visualIcons[i%visualIcons.length]}</span><p class="label">${k[0]}</p><div class="value"><span>${k[1]}</span><span class="delta">${k[2]}</span></div></article>`).join('')}
+function renderBars(id,data){document.getElementById(id).innerHTML=data.map((v,i)=>`<div class="bar" data-label="${labels[i]}" style="height:${Math.max(48,v*2.35)}px">${v}%</div>`).join('')}
+function renderCircles(id,data=circleData){document.getElementById(id).innerHTML=data.map(d=>`<div class="circle-card"><div class="donut" style="--p:${d[1]}"><strong>${d[1]}%</strong></div><b>${d[0]}</b><p class="label">Target semester</p></div>`).join('')}
+function renderFeed(id,items=feeds){document.getElementById(id).innerHTML=`<div class="feed">${items.map(x=>`<div><b>${x.split(':')[0]}</b><small>${x.split(':')[1]||'Update realtime'}</small></div>`).join('')}</div>`}
+function userTimeZone(){return Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Jakarta'}
+function updateDashboardClock(){
+      const tz=userTimeZone(),now=new Date();
+      const day=new Intl.DateTimeFormat('id-ID',{weekday:'long',timeZone:tz}).format(now);
+      const date=new Intl.DateTimeFormat('id-ID',{day:'2-digit',month:'long',year:'numeric',timeZone:tz}).format(now);
+      const time=new Intl.DateTimeFormat('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:tz}).format(now).replace(/\./g,':');
+      document.getElementById('dashboardDay').textContent=day;
+      document.getElementById('dashboardClock').textContent=time;
+      document.getElementById('dashboardDate').textContent=date+' · Zona waktu user: '+tz;
+    }
+function startDashboardClock(){updateDashboardClock();setInterval(updateDashboardClock,1000)}
+function escapeHtml(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function renderAttendanceBox(id,data){
+      const el=document.getElementById(id);
+      const rows=(data.terbaru||[]).map(x=>{
+        const tanggal=x.tanggalLokal||x.tanggal||'',waktu=x.jamLokal||x.waktu||'',tz=x.zonaWaktuUser?' · '+x.zonaWaktuUser:'';
+        return `<div class="attendance-row"><div><b>${escapeHtml(x.nama)}</b><small>${escapeHtml(x.identitas)} · ${escapeHtml(x.peran)}${x.unit?' · '+escapeHtml(x.unit):''}${x.jabatan?' · '+escapeHtml(x.jabatan):''}</small><small>${escapeHtml(x.status||'-')}${x.catatan?' · '+escapeHtml(x.catatan):''}</small></div><div style="text-align:right"><b>${escapeHtml(x.tipe)}</b><small>${escapeHtml(tanggal)} ${escapeHtml(waktu)}${escapeHtml(tz)}</small></div></div>`;
+      }).join('');
+      el.innerHTML=`<div class="attendance-stats"><div class="attendance-stat"><span class="label">Total</span><b>${data.total||0}</b></div><div class="attendance-stat"><span class="label">Masuk</span><b>${data.masuk||0}</b></div><div class="attendance-stat"><span class="label">Keluar</span><b>${data.keluar||0}</b></div></div>${rows?`<div class="attendance-list">${rows}</div>`:'<div class="empty">Belum ada absensi hari ini.</div>'}`;
+    }
+function parentSppStatus(child){
+      const raw=String(child.statusPembayaranSpp||child.sppStatus||child.statusSpp||child.pembayaranSpp||'').trim();
+      if(/lunas|paid|selesai/i.test(raw)&&!/belum|tunggak|kurang|tagihan/i.test(raw))return 'Lunas';
+      return 'Belum Lunas';
+    }
+function parentChildReport(child){
+      const health=latestHealthFor(child),academic=reportPercent(child,82),hafalan=String(child.programPendidikan||'').toLowerCase().includes('tahfidz')?'18 Juz':'6 Juz',hafalanPct=reportPercent(child,74),attendance=96;
+      const sppDetail=child.statusPembayaranSpp||child.sppStatus||child.statusSpp||child.pembayaranSpp||'Belum ada data pelunasan SPP dari Bendahara MDD.';
+      const spp=parentSppStatus(child);
+      return {health,academic,hafalan,hafalanPct,attendance,spp,sppDetail,paymentOk:spp==='Lunas',prestasi:child.prestasi||'Adab baik, disiplin mengikuti pembelajaran, dan aktif dalam kegiatan kelas.',bakat:child.bakat||'Public speaking, konten dakwah digital, dan kepemimpinan.',cita:child.citaCita||'Dai digital yang berilmu, beradab, dan berdampak.'};
+    }
+function parentDashboardHtml(child){
+      const report=parentChildReport(child),childPhoto=studentPhoto(child),photo=childPhoto?`<img class="parent-photo" src="${childPhoto}" alt="Foto ${escapeHtml(child.namaLengkap)}">`:`<span class="parent-photo">${initials(child.namaLengkap)}</span>`;
+      return `<div class="parent-page"><div class="parent-hero">${photo}<div><span class="badge">Akun Orang Tua · ${escapeHtml(studentCode(child)||'-')}</span><h2>${escapeHtml(child.namaLengkap||'-')}</h2><p>${escapeHtml(child.kelas||'-')} · ${escapeHtml(child.programPendidikan||'-')} · NIS ${escapeHtml(child.nis||'-')}</p><div class="parent-metrics"><div class="parent-metric"><span>Absensi</span><b>${report.attendance}%</b></div><div class="parent-metric"><span>Akademik</span><b>${report.academic}%</b></div><div class="parent-metric"><span>Hafalan</span><b>${escapeHtml(report.hafalan)}</b></div><div class="parent-metric"><span>SPP</span><b>${escapeHtml(report.spp)}</b></div></div></div></div><div class="parent-grid"><div class="parent-card"><h4>Laporan Akademik</h4><p>Rata-rata raport dan evaluasi akademik santri.</p><div class="parent-progress" style="--p:${report.academic}"><i></i></div><div class="parent-mini-bars"><div style="height:86%">Quran</div><div style="height:74%">Arab</div><div style="height:92%">IT</div><div style="height:81%">Adab</div></div></div><div class="parent-card"><h4>Laporan Hafalan</h4><div class="parent-donuts"><span class="parent-donut"><i style="--p:${report.hafalanPct}"><b>${report.hafalanPct}%</b></i><small>Target</small></span><span class="parent-donut"><i style="--p:68"><b>Mur</b></i><small>Murajaah</small></span><span class="parent-donut"><i style="--p:82"><b>Setor</b></i><small>Setoran</small></span></div><p style="margin-top:10px">Hafalan saat ini: <b>${escapeHtml(report.hafalan)}</b>. Setoran dan murajaah dipantau berkala.</p></div><div class="parent-card"><h4>Laporan Kesehatan</h4><p>BMI: <b>${escapeHtml(report.health.bmi||'-')}</b><br>Berat/Tinggi: ${escapeHtml(report.health.beratBadan||'-')} kg / ${escapeHtml(report.health.tinggiBadan||'-')} cm<br>Tekanan darah: ${escapeHtml(report.health.tekananDarah||'-')}<br>Catatan: ${escapeHtml(report.health.catatanKesehatan||child.riwayatPenyakit||'Belum ada catatan khusus.')}</p></div><div class="parent-card"><h4>Status Pembayaran SPP</h4><p class="${report.paymentOk?'payment-good':'payment-warn'}">${escapeHtml(report.spp)}</p><div class="parent-progress" style="--p:${report.paymentOk?100:58}"><i></i></div><p>${escapeHtml(report.sppDetail)}</p></div><div class="parent-card"><h4>Prestasi & Perkembangan</h4><p>${escapeHtml(report.prestasi)}</p><div class="parent-tags" style="margin-top:12px"><span class="parent-tag">Disiplin</span><span class="parent-tag">Adab</span><span class="parent-tag">Aktif</span></div></div><div class="parent-card"><h4>Bakat & Cita-cita</h4><p><b>Bakat:</b> ${escapeHtml(report.bakat)}</p><p style="margin-top:8px"><b>Cita-cita:</b> ${escapeHtml(report.cita)}</p></div></div></div>`;
+    }
+
+function initials(name=''){return name.split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
+function studentCode(s){return s.kodeSantriMdd}
+function studentPhoto(){return ''}
+function reportPercent(){return 88}
+function latestHealthFor(){return {bmi:'19,8',beratBadan:48,tinggiBadan:156,tekananDarah:'110/70',catatanKesehatan:'Kondisi baik (ilustrasi)'}}
+function showToast(message){const t=document.getElementById('toast');t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+function setPage(id){document.querySelectorAll('.section').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));document.getElementById('sidebar').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('show');window.scrollTo({top:0,behavior:'instant'})}
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('show');document.getElementById('modal').classList.remove('show')}
+function detail(index){const s=students[index];document.getElementById('modalTitle').textContent='Profil Santri · Data Ilustrasi';document.getElementById('modalBody').innerHTML='<p><b>'+escapeHtml(s.namaLengkap)+'</b></p><p>Kelas: '+escapeHtml(s.kelas)+'</p><p>Program: '+escapeHtml(s.programPendidikan)+'</p><p>Wali kelas: '+escapeHtml(s.waliKelas)+'</p><p>Kode: '+escapeHtml(s.kodeSantriMdd)+'</p><p class="demo-note">Semua data pada halaman ini hanya ilustrasi presentasi.</p>';document.getElementById('modalBackdrop').classList.add('show');document.getElementById('modal').classList.add('show')}
+document.getElementById('studentTable').innerHTML='<thead><tr><th>Santri</th><th>Kode</th><th>Kelas</th><th>Program</th><th>Status</th><th>Profil</th></tr></thead><tbody>'+students.map((s,i)=>'<tr><td><b>'+escapeHtml(s.namaLengkap)+'</b><br><small>Data ilustrasi</small></td><td>'+s.kodeSantriMdd+'</td><td>'+s.kelas+'</td><td>'+s.programPendidikan+'</td><td><span class="status ok">'+s.status+'</span></td><td><button class="ghost" data-detail="'+i+'">Lihat Detail</button></td></tr>').join('')+'</tbody>';
+document.getElementById('studentCount').textContent=students.length+' profil ilustrasi';
+document.getElementById('healthFormGrid').innerHTML=healthFields.map(([key,label,type])=>'<div class="form-field"><label>'+label+'</label>'+(type==='textarea'?'<textarea class="select" disabled placeholder="Contoh kolom laporan"></textarea>':'<input class="select" disabled placeholder="Contoh kolom '+label+'">')+'</div>').join('');
+document.querySelectorAll('form').forEach(f=>f.addEventListener('submit',e=>e.preventDefault()));
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;if(b.dataset.page)setPage(b.dataset.page);if(b.dataset.detail!==undefined)detail(Number(b.dataset.detail));if(b.dataset.chart){document.querySelectorAll('[data-chart]').forEach(t=>t.classList.toggle('active',t===b));renderBars('barChart',charts[b.dataset.chart]);}});
+document.getElementById('menuBtn').onclick=()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('drawerBackdrop').classList.add('show')};
+document.getElementById('drawerBackdrop').onclick=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('show')};
+document.getElementById('themeBtn').onclick=()=>{const app=document.getElementById('app');app.dataset.theme=app.dataset.theme==='dark'?'light':'dark'};
+document.getElementById('notifBtn').onclick=()=>document.getElementById('notifPanel').classList.toggle('show');
+document.getElementById('modalClose').onclick=closeModal;document.getElementById('modalBackdrop').onclick=closeModal;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();document.getElementById('sidebar').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('show')}});
+renderKpi();renderBars('barChart',charts.attendance);renderBars('academicChart',charts.academic);renderBars('healthChart',[70,72,76,80,79,84,87,89]);renderBars('financeChart',charts.finance);renderBars('biChart',[62,69,74,81,88,91,93,96]);renderCircles('circleReports');renderCircles('hafalanCircles',[['Al-Quran',78],['Hadits',64],['Kitab',71]]);renderCircles('donationCircles',[['Zakat',86],['Infaq',74],['Wakaf',83]]);renderCircles('biCircles',[['Prestasi',82],['Guru',91],['Donasi',88]]);
+renderFeed('subjectList',['Tahfidz:42 ustadz pembimbing (ilustrasi)','Digital Dakwah:AI, coding, desain dan konten','Bahasa Arab:Silabus semester ganjil']);renderFeed('invoiceList',['SPP Oktober:Rp 750.000 · data ilustrasi','Wakaf Gedung:Progress 83% dari target']);renderFeed('donorList',['Hamba Allah:Rp 12.500.000 · Wakaf (ilustrasi)','Keluarga Santri:Rp 3.000.000 · Infaq (ilustrasi)']);renderFeed('hafalanFeed',['Ahmad Zaidan:Setor 2 halaman (ilustrasi)','Fatimah Azzahra:Murajaah Juz 29 (ilustrasi)']);renderFeed('healthFeed',['Pemeriksaan berkala:Kondisi santri baik (ilustrasi)']);
+document.getElementById('parentSummary').innerHTML=parentDashboardHtml({...students[0],statusPembayaranSpp:'Lunas'});
+renderAttendanceBox('santriAttendance',{total:1248,masuk:1198,keluar:1140,terbaru:[{nama:'Ahmad Zaidan',identitas:'KSMDD-0001',peran:'Santri',tipe:'Masuk',status:'Hadir (ilustrasi)',waktu:'07:00'}]});renderAttendanceBox('civitasAttendance',{total:128,masuk:125,keluar:118,terbaru:[{nama:'Ust. Fikri',identitas:'GURU-001',peran:'Guru',tipe:'Masuk',status:'Hadir (ilustrasi)',waktu:'06:45'}]});
+document.querySelectorAll('.panel h3').forEach((el,i)=>el.insertAdjacentHTML('afterbegin','<span class="heading-icon">'+visualIcons[i%visualIcons.length]+'</span>'));
+startDashboardClock();
+
+</script>
+</body>
+</html>
