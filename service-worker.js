@@ -1,9 +1,10 @@
-const CACHE_NAME = 'markaz-dakwah-digital-github-pages-v9';
+const CACHE_NAME = 'markaz-dakwah-digital-github-pages-glossy-v10';
 const SHELL_ASSETS = [
   './',
   './index.html',
   './preview.html',
   './manifest.webmanifest',
+  './apps/web/public/chairman-placeholder.svg',
   './apps/web/public/logo-mdd.png',
   './apps/web/public/icon-192.png',
   './apps/web/public/icon-512.png',
