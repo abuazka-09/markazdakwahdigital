@@ -1,4 +1,4 @@
-const CACHE_NAME = 'markaz-dakwah-digital-github-pages-glossy-v10';
+const CACHE_NAME = 'markaz-dakwah-digital-github-pages-glossy-v11';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -40,7 +40,7 @@ self.addEventListener('fetch', (event) => {
       fetch(event.request)
         .then((response) => {
           var copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          caches.open(CACHE_NAME).then((cache) => response.ok && cache.put(event.request, copy));
           return response;
         })
         .catch(() => caches.match(event.request))
@@ -54,7 +54,7 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(event.request).then((response) => {
         var copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        caches.open(CACHE_NAME).then((cache) => response.ok && cache.put(event.request, copy));
         return response;
       });
     })
