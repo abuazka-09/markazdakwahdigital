@@ -2,6 +2,8 @@ function doGet(e) {
   e = e || { parameter: {} };
   var action = String((e.parameter && e.parameter.action) || '').toLowerCase();
 
+  if (action === 'operationresult') return operationResult_(e.parameter || {});
+
   if (action === 'foundationprofile' || action === 'foundationprofilestatus') {
     return foundationProfileGet_(e.parameter || {});
   }
@@ -62,6 +64,8 @@ function doPost(e) {
     var payload = JSON.parse(rawBody);
     var type = payload.type || '';
     var data = payload.data || {};
+
+    if (type === 'operation.create' || type === 'operation.list') return jsonResponse(operationRun_(payload));
 
     if (type === 'foundation.profile.update') {
       return jsonResponse(saveFoundationProfile_(payload));
