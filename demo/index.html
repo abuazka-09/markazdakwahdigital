@@ -309,6 +309,7 @@ button:disabled,input:disabled,select:disabled,textarea:disabled{cursor:not-allo
 @media(min-width:761px){.mobile-menu{display:none!important}}
 @media(max-width:760px){.nav button{min-height:54px}.chairman{margin-left:0}.sidebar{padding-bottom:35px}.topbar{position:relative}.title h1{font-size:14px}}
 .boarding-splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(ellipse at top,#1065ca,#06275e 65%,#03152f);color:white;transition:opacity .22s ease;pointer-events:none}.boarding-splash img{width:min(260px,64vw);height:auto;max-height:58vh;object-fit:contain;border-radius:22px;box-shadow:0 0 0 2px #e2b44f,0 18px 60px #00153880}.boarding-splash strong{font-size:clamp(18px,3vw,26px);letter-spacing:1.5px;text-align:center}.boarding-splash span{font-size:14px;color:#f2d68a}.boarding-ready{opacity:0}.brand img{height:130px;width:130px}.hero-logo{background:none!important;height:230px;width:230px;filter:drop-shadow(0 12px 20px #001b4c44)}@media(max-width:760px){.title h1{font-size:15px}}@media(prefers-reduced-motion:reduce){.boarding-splash{transition:none}}
+img[src*="mdd-boarding-logo.png"]{visibility:hidden}.mdd-alpha-ready{visibility:visible!important}.boarding-splash img{border-radius:0;box-shadow:none;filter:drop-shadow(0 12px 18px #00153880)}
 </style>
 </head>
 <body>
@@ -472,6 +473,34 @@ renderAttendanceBox('santriAttendance',{total:1248,masuk:1198,keluar:1140,terbar
 document.querySelectorAll('.panel h3').forEach((el,i)=>el.insertAdjacentHTML('afterbegin','<span class="heading-icon">'+visualIcons[i%visualIcons.length]+'</span>'));
 startDashboardClock();
 
+</script>
+<script>
+// Remove the baked checkerboard from the existing artwork without redrawing it.
+(function(){
+ const logos=[...document.querySelectorAll('img')].filter(i=>(i.getAttribute('src')||'').includes('mdd-boarding-logo.png'));
+ if(!logos.length)return;
+ const source=new Image(); source.src=logos[0].src;
+ source.onload=function(){try{
+  const canvas=document.createElement('canvas');canvas.width=source.naturalWidth;canvas.height=source.naturalHeight;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(source,0,0);
+  const frame=ctx.getImageData(0,0,canvas.width,canvas.height),p=frame.data,n=canvas.width*canvas.height,w=canvas.width;
+  const candidate=new Uint8Array(n),seen=new Uint8Array(n),queue=new Int32Array(n);
+  for(let i=0;i<n;i++){const j=i*4,r=p[j],g=p[j+1],b=p[j+2];candidate[i]=(Math.min(r,g,b)>185&&Math.max(r,g,b)-Math.min(r,g,b)<17)?1:0;}
+  for(let i=0;i<n;i++){
+   if(!candidate[i]||seen[i])continue;
+   let head=0,tail=1;queue[0]=i;seen[i]=1;
+   while(head<tail){const k=queue[head++],x=k%w;
+    const next=[x?k-1:-1,x<w-1?k+1:-1,k>=w?k-w:-1,k<n-w?k+w:-1];
+    for(const a of next)if(a>=0&&candidate[a]&&!seen[a]){seen[a]=1;queue[tail++]=a;}
+   }
+   // Keep small white specular highlights on the blue/gold artwork.
+   if(tail>48)for(let a=0;a<tail;a++)p[queue[a]*4+3]=0;
+  }
+  ctx.putImageData(frame,0,0);const transparent=canvas.toDataURL('image/png');
+  logos.forEach(i=>{i.src=transparent;i.classList.add('mdd-alpha-ready');});
+ }catch(e){logos.forEach(i=>i.classList.add('mdd-alpha-ready'));}};
+ source.onerror=()=>logos.forEach(i=>i.classList.add('mdd-alpha-ready'));
+})();
 </script>
 </body>
 </html>
