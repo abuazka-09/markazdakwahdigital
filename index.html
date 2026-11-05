@@ -3,12 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MARKAZ DAKWAH DIGITAL - Smart Education Dashboard</title>
+  <title>MDD Boarding School</title>
+  <meta name="application-name" content="MDD Boarding School">
+  <meta name="apple-mobile-web-app-title" content="MDD Boarding School">
+  <meta name="description" content="Smart dashboard pendidikan Islam: santri, akademik, hafalan, kesehatan, keuangan, dan ZISWAF dalam satu aplikasi.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:site_name" content="MDD Boarding School">
+  <meta property="og:title" content="MDD Boarding School">
+  <meta property="og:description" content="Smart dashboard pendidikan Islam: santri, akademik, hafalan, kesehatan, keuangan, dan ZISWAF dalam satu aplikasi.">
+  <meta property="og:url" content="https://abuazka-09.github.io/markazdakwahdigital/">
+  <meta property="og:image" content="https://abuazka-09.github.io/markazdakwahdigital/mdd-boarding-share.jpg">
+  <meta property="og:image:secure_url" content="https://abuazka-09.github.io/markazdakwahdigital/mdd-boarding-share.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1000">
+  <meta property="og:image:height" content="1000">
+  <meta property="og:image:alt" content="Logo MDD Boarding School royal blue dan gold">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MDD Boarding School">
+  <meta name="twitter:description" content="Smart dashboard pendidikan Islam: santri, akademik, hafalan, kesehatan, keuangan, dan ZISWAF dalam satu aplikasi.">
+  <meta name="twitter:image" content="https://abuazka-09.github.io/markazdakwahdigital/mdd-boarding-share.jpg">
+
   <meta name="theme-color" content="#09245a" />
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./apps/web/public/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./apps/web/public/favicon-16.png" />
-  <link rel="apple-touch-icon" href="./apps/web/public/apple-touch-icon.png" />
+  <link rel="manifest" href="./manifest.webmanifest?v=boarding-1" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./mdd-boarding-favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./mdd-boarding-favicon-16.png" />
+  <link rel="apple-touch-icon" href="./mdd-boarding-apple.png" />
   <style>
     :root {
       --blue-950: #06152f;
@@ -283,13 +303,17 @@ body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .op-panel,.op-field,.op-status{color:var(--ink)}
+.boarding-splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(ellipse at top,#1065ca,#06275e 65%,#03152f);color:white;transition:opacity .22s ease;pointer-events:none}.boarding-splash img{width:min(260px,64vw);height:auto;max-height:58vh;object-fit:contain;border-radius:22px;box-shadow:0 0 0 2px #e2b44f,0 18px 60px #00153880}.boarding-splash strong{font-size:clamp(18px,3vw,26px);letter-spacing:1.5px;text-align:center}.boarding-splash span{font-size:14px;color:#f2d68a}.boarding-ready{opacity:0}.brand img{height:130px;width:130px}.hero-logo{background:none!important;height:230px;width:230px;filter:drop-shadow(0 12px 20px #001b4c44)}@media(max-width:760px){.title h1{font-size:15px}}@media(prefers-reduced-motion:reduce){.boarding-splash{transition:none}}
 </style>
 </head>
 <body>
+  <div id="boardingSplash" class="boarding-splash" role="status" aria-label="Membuka MDD Boarding School"><img src="./mdd-boarding-logo.png" alt="Logo MDD Boarding School" width="240" height="240"><strong>MDD BOARDING SCHOOL</strong><span>Berilmu · Beradab · Berdampak</span></div>
+  <script>(function(){const splash=document.getElementById('boardingSplash'),start=Date.now();let scheduled=false;function hide(){if(scheduled)return;scheduled=true;setTimeout(()=>{splash.classList.add('boarding-ready');setTimeout(()=>splash.remove(),250)},Math.max(0,700-(Date.now()-start)))}window.addEventListener('load',hide,{once:true});setTimeout(hide,2200);})();</script>
+
   <section class="login-screen" id="loginScreen">
     <div class="login-card">
-      <img src="apps/web/public/logo-mdd.png" alt="Logo MDD">
-      <h2>Login Markaz Dakwah Digital</h2>
+      <img src="./mdd-boarding-logo.png" alt="Logo MDD Boarding School">
+      <h2>Login MDD Boarding School</h2>
       <p>Pilih role pengguna, masukkan password, lalu masuk ke dashboard sesuai hak akses.</p>
       <div class="login-fields">
         <label>Role User
@@ -308,7 +332,7 @@ body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--
   <div class="drawer-backdrop" id="drawerBackdrop"></div>
   <div class="app locked" id="app" data-theme="light">
     <aside class="sidebar" id="sidebar">
-      <div class="brand"><img src="apps/web/public/logo-mdd.png" alt="Logo MDD"><div><strong>MARKAZ DAKWAH</strong><span>DIGITAL SMART DASHBOARD</span></div></div>
+      <div class="brand"><img src="./mdd-boarding-logo.png" alt="Logo MDD Boarding School"><div><strong>MDD BOARDING SCHOOL</strong><span>SMART EDUCATION DASHBOARD</span></div></div>
       <nav class="nav" id="nav">
         <button class="active" data-page="dashboard"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7v11h-6v-7H9v7H3Z"/></svg></span> Dashboard Utama</button>
         <button data-page="santri"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M18 8h4 M20 6v4"/></svg></span> Database Santri</button>
@@ -325,7 +349,7 @@ body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--
     <main class="content">
       <header class="topbar">
         <button class="iconbtn mobile-menu" id="menuBtn" title="Buka menu"><span class="hamb"><span></span><span></span><span></span></span></button>
-        <div class="title"><img src="apps/web/public/logo-mdd.png" alt="Logo MDD"><div><h1>MARKAZ DAKWAH DIGITAL</h1><p class="subtitle">Smart Education Dashboard realtime</p></div></div>
+        <div class="title"><img src="./mdd-boarding-logo.png" alt="Logo MDD Boarding School"><div><h1>MDD BOARDING SCHOOL</h1><p class="subtitle">Smart Education Dashboard realtime</p></div></div>
         <div class="actions">
           <label class="search"><span class="searchIcon"></span><input id="globalSearch" placeholder="Cari santri, guru, donatur, invoice..."></label>
           <span class="role-pill" id="activeRoleLabel">Belum Login</span>
@@ -337,8 +361,8 @@ body{background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 65%),var(--
 
       <section class="section active" id="dashboard">
         <div class="hero">
-          <div><span class="badge"><span class="pulseDot"></span> Realtime aktif</span><h2>Lembaga Pendidikan Islam Modern Markaz Dakwah Digital</h2><p><strong>(Inspired by Revelation. Driven by Innovation)</strong><br>Berilmu &bull; Beradab &bull; Berdampak</p><div class="time-panel"><span id="dashboardDay">Memuat hari...</span><strong id="dashboardClock">--:--:--</strong><small id="dashboardDate">Zona waktu user</small></div><div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" data-action="refresh"><span class="btnIcon refreshIcon"></span> Refresh Data</button><button class="gold" data-action="export"><span class="btnIcon exportIcon"></span> Export CSV</button><button class="ghost" data-action="qr"><span class="btnIcon qrIcon"></span> QR Absensi</button></div></div>
-          <img class="hero-logo" src="apps/web/public/logo-mdd.png" alt="Logo Markaz Dakwah Digital">
+          <div><span class="badge"><span class="pulseDot"></span> Realtime aktif</span><h2>MDD Boarding School</h2><p><strong>(Inspired by Revelation. Driven by Innovation)</strong><br>Berilmu &bull; Beradab &bull; Berdampak</p><div class="time-panel"><span id="dashboardDay">Memuat hari...</span><strong id="dashboardClock">--:--:--</strong><small id="dashboardDate">Zona waktu user</small></div><div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" data-action="refresh"><span class="btnIcon refreshIcon"></span> Refresh Data</button><button class="gold" data-action="export"><span class="btnIcon exportIcon"></span> Export CSV</button><button class="ghost" data-action="qr"><span class="btnIcon qrIcon"></span> QR Absensi</button></div></div>
+          <img class="hero-logo" src="./mdd-boarding-logo.png" alt="Logo MDD Boarding School">
         </div>
         <div class="grid-kpi" id="kpiGrid"></div>
         <div class="attendance-grid">
