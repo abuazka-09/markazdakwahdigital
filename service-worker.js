@@ -1,11 +1,18 @@
-const CACHE_NAME = 'markaz-dakwah-digital-github-pages-operational-forms-v15';
+const CACHE_NAME = 'markaz-dakwah-digital-github-pages-boarding-school-v16';
 const SHELL_ASSETS = [
   './',
   './index.html',
   './preview.html',
   './profile-sync.js?v=1',
   './operational-forms.js?v=2',
-  './manifest.webmanifest',
+  './manifest.webmanifest?v=boarding-1',
+  './mdd-boarding-logo.png',
+  './mdd-boarding-icon-192.png',
+  './mdd-boarding-icon-512.png',
+  './mdd-boarding-apple.png',
+  './mdd-boarding-favicon-32.png',
+  './mdd-boarding-favicon-16.png',
+  './mdd-boarding-share.jpg',
   './apps/web/public/chairman-placeholder.svg',
   './apps/web/public/logo-mdd.png',
   './apps/web/public/icon-192.png',
